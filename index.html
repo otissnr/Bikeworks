@@ -4,7 +4,8 @@
   <meta charset="UTF-8" />
   <title>Digital Bike Workshop</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- Favicon: point this to your logo file in the same folder -->
+
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="logo.png" />
 
   <style>
@@ -38,1054 +39,1910 @@
       display: flex;
     }
 
-    .app-shell {
-      display: grid;
-      grid-template-columns: 260px minmax(0, 1fr);
-      width: 100%;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      background: linear-gradient(to bottom, #020617, #030712);
-      border-right: 1px solid var(--border);
-      padding: 18px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-
-    .sidebar-title {
-      font-size: 0.9rem;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      color: var(--muted);
-    }
-
-    .nav-section-label {
-      font-size: 0.75rem;
-      text-transform: uppercase;
-      letter-spacing: 0.16em;
-      color: var(--muted);
-      margin: 12px 0 4px;
-    }
-
-    .nav-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 8px;
-      color: var(--muted);
-      cursor: pointer;
-      transition: background 0.15s, color 0.15s, transform 0.08s;
-      font-size: 0.9rem;
-    }
-
-    .nav-item span.icon {
-      font-size: 1rem;
-      width: 20px;
-      text-align: center;
-    }
-
-    .nav-item.active {
-      background: var(--accent-soft);
-      color: var(--text);
-      border: 1px solid rgba(34, 197, 94, 0.4);
-    }
-
-    .nav-item:hover {
-      background: rgba(148, 163, 184, 0.12);
-      color: var(--text);
-      transform: translateX(1px);
-    }
-
-    .sidebar-footer {
-      margin-top: auto;
-      font-size: 0.75rem;
-      color: var(--muted);
-      border-top: 1px solid var(--border);
-      padding-top: 10px;
-    }
-
-    /* Main */
-    .main {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-    }
-
-    /* Header */
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 12px 18px;
-      border-bottom: 1px solid var(--border);
-      background: linear-gradient(to right, #020617, #0b1120);
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .logo-circle {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      background: #ffffff;
+    /* LOGIN PAGE */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      background: #020617;
       display: flex;
       align-items: center;
       justify-content: center;
-    }
-
-    .logo-circle img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-    }
-
-    .header-title {
-      display: flex;
       flex-direction: column;
+      gap: 20px;
+      z-index: 9999;
     }
 
-    .header-title-main {
-      font-size: 1.1rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
-
-    .header-title-sub {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .pill {
-      padding: 4px 8px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      background: rgba(15, 23, 42, 0.7);
-    }
-
-    .pill-accent {
-      border-color: rgba(34, 197, 94, 0.5);
-      color: var(--accent);
-    }
-
-    /* Content */
-    .content {
-      flex: 1;
-      padding: 16px 18px 12px;
-      background: radial-gradient(circle at top, #020617 0, #020617 40%, #000000 100%);
-      overflow-y: auto;
-    }
-
-    .page {
-      display: none;
-      animation: fadeIn 0.18s ease-out;
-    }
-
-    .page.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(4px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .page-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 12px;
-    }
-
-    .page-title {
-      font-size: 1rem;
-      font-weight: 600;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-    }
-
-    .page-subtitle {
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .page-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-      gap: 12px;
-    }
-
-    .card {
+    #login-box {
       background: var(--panel);
-      border-radius: 10px;
       border: 1px solid var(--border);
-      padding: 10px 12px;
+      padding: 24px 28px;
+      border-radius: 12px;
+      width: 320px;
       box-shadow: 0 10px 25px rgba(15, 23, 42, 0.6);
     }
 
-    .card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-
-    .card-title {
-      font-size: 0.9rem;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .card-title span.icon {
-      font-size: 1rem;
-    }
-
-    .card-subtitle {
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-
-    .badge {
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      border-radius: 999px;
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
-
-    .badge-ok {
-      border-color: rgba(34, 197, 94, 0.5);
-      color: var(--ok);
-    }
-
-    .badge-warn {
-      border-color: rgba(249, 115, 22, 0.5);
-      color: var(--warning);
-    }
-
-    .badge-danger {
-      border-color: rgba(239, 68, 68, 0.5);
-      color: var(--danger);
-    }
-
-    .list {
-      list-style: none;
-      font-size: 0.8rem;
-      color: var(--muted);
-    }
-
-    .list li {
-      padding: 4px 0;
-      border-bottom: 1px dashed rgba(55, 65, 81, 0.6);
-    }
-
-    .list li:last-child {
-      border-bottom: none;
-    }
-
-    .list-label {
-      color: var(--text);
-      font-weight: 500;
-    }
-
-    .tag-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 4px;
-    }
-
-    .tag {
-      font-size: 0.7rem;
-      padding: 2px 6px;
-      border-radius: 999px;
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      background: rgba(15, 23, 42, 0.9);
-      color: var(--muted);
-    }
-
-    .tag-accent {
-      border-color: rgba(34, 197, 94, 0.6);
-      color: var(--accent);
-    }
-
-    /* Design Document page */
-    .design-doc {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .design-doc h1 {
+    #login-box h1 {
       font-size: 1.3rem;
-      margin-bottom: 6px;
+      margin-bottom: 10px;
+      text-align: center;
     }
 
-    .design-doc h2 {
-      font-size: 1rem;
-      margin-top: 14px;
-      margin-bottom: 4px;
-    }
-
-    .design-doc h3 {
-      font-size: 0.9rem;
+    #login-box input {
+      width: 100%;
+      padding: 10px;
       margin-top: 10px;
-      margin-bottom: 3px;
-    }
-
-    .design-doc p {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 6px;
-      line-height: 1.5;
-    }
-
-    .design-doc ul {
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-left: 16px;
-      margin-bottom: 6px;
-    }
-
-    .design-doc li {
-      margin-bottom: 3px;
-    }
-
-    .design-doc-callout {
-      border-left: 3px solid var(--accent);
-      padding-left: 10px;
-      margin: 10px 0;
-      font-size: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0f172a;
       color: var(--text);
     }
 
-    /* Footer */
-    .footer {
-      padding: 8px 18px;
-      font-size: 0.75rem;
+    #login-box button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    #create-account-link {
+      margin-top: 10px;
+      text-align: center;
       color: var(--muted);
-      border-top: 1px solid var(--border);
-      background: #020617;
-      display: flex;
-      justify-content: space-between;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
+    /* CREATE ACCOUNT MODAL */
+    #create-account-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      display: none;
       align-items: center;
+      justify-content: center;
+      z-index: 99999;
     }
 
-    .footer span {
-      white-space: nowrap;
+    #create-account-box {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      padding: 24px 28px;
+      border-radius: 12px;
+      width: 320px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.6);
     }
 
-    @media (max-width: 900px) {
-      .app-shell {
-        grid-template-columns: 220px minmax(0, 1fr);
-      }
-      .page-grid {
-        grid-template-columns: minmax(0, 1fr);
-      }
+    #create-account-box h2 {
+      font-size: 1.1rem;
+      margin-bottom: 10px;
+      text-align: center;
     }
 
-    @media (max-width: 720px) {
-      body {
-        flex-direction: column;
-      }
-      .app-shell {
-        grid-template-columns: minmax(0, 1fr);
-      }
-      .sidebar {
-        flex-direction: row;
-        overflow-x: auto;
-        padding-bottom: 10px;
-      }
-      .nav-section-label {
-        display: none;
-      }
-      .nav-list {
-        flex-direction: row;
-        flex-wrap: nowrap;
-      }
-      .nav-item {
-        white-space: nowrap;
-      }
-      .header {
-        padding: 10px 12px;
-      }
-      .content {
-        padding: 12px;
-      }
-      .footer {
-        padding: 8px 12px;
-      }
+    #create-account-box input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #0f172a;
+      color: var(--text);
+    }
+
+    #create-account-box button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 14px;
+      border-radius: 8px;
+      border: 1px solid var(--accent);
+      background: var(--accent-soft);
+      color: var(--accent);
+      cursor: pointer;
+      font-size: 1rem;
+    }
+
+    #cancel-create {
+      margin-top: 10px;
+      text-align: center;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 0.85rem;
     }
   </style>
 </head>
+
 <body>
-  <div class="app-shell">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div>
-        <div class="sidebar-title">Digital Bike Workshop</div>
-        <div style="font-size:0.8rem;color:var(--muted);margin-top:4px;">
-          Relentless Attacks · Jones Street Cycles
-        </div>
-      </div>
 
-      <div>
-        <div class="nav-section-label">Workshop</div>
-        <ul class="nav-list">
-          <li class="nav-item active" data-page="dashboard">
-            <span class="icon">🏁</span>
-            <span>Dashboard</span>
-          </li>
-          <li class="nav-item" data-page="bikes">
-            <span class="icon">🚲</span>
-            <span>Bikes</span>
-          </li>
-          <li class="nav-item" data-page="spares">
-            <span class="icon">🧩</span>
-            <span>Spares & Components</span>
-          </li>
-          <li class="nav-item" data-page="tools">
-            <span class="icon">🛠️</span>
-            <span>Tools & Jigs</span>
-          </li>
-          <li class="nav-item" data-page="repairs">
-            <span class="icon">📋</span>
-            <span>Repairs & Jobs</span>
-          </li>
-        </ul>
-      </div>
-
-      <div>
-        <div class="nav-section-label">Community & Admin</div>
-        <ul class="nav-list">
-          <li class="nav-item" data-page="community">
-            <span class="icon">👥</span>
-            <span>Community & Sharing</span>
-          </li>
-          <li class="nav-item" data-page="admin">
-            <span class="icon">⚙️</span>
-            <span>Admin & Data</span>
-          </li>
-          <li class="nav-item" data-page="design-doc">
-            <span class="icon">📘</span>
-            <span>Design Document</span>
-          </li>
-        </ul>
-      </div>
-
-      <div class="sidebar-footer">
-        <div>Digital Bike Workshop · Local-first concept</div>
-        <div style="margin-top:4px;">Relentless Attacks · Jones Street Cycles</div>
-      </div>
-    </aside>
-
-    <!-- Main -->
-    <div class="main">
-      <!-- Header -->
-      <header class="header">
-        <div class="header-left">
-          <div class="logo-circle">
-            <!-- Point src to your logo file (white background, circle feel) -->
-            <img src="logo.png" alt="Relentless Attacks / Jones Street Cycles logo" />
-          </div>
-          <div class="header-title">
-            <div class="header-title-main">Digital Bike Workshop</div>
-            <div class="header-title-sub">
-              Cycling spares, jobs, tools & community · Local-first
-            </div>
-          </div>
-        </div>
-        <div class="header-right">
-          <div class="pill pill-accent">Workshop Mode: Demo</div>
-          <div class="pill">Data: Local-first concept</div>
-        </div>
-      </header>
-
-      <!-- Content -->
-      <main class="content">
-        <!-- Dashboard -->
-        <section class="page active" id="page-dashboard">
-          <div class="page-header">
-            <div>
-              <div class="page-title">Workshop Overview</div>
-              <div class="page-subtitle">
-                Bikes, spares, tools and jobs at a glance.
-              </div>
-            </div>
-            <div class="badge badge-ok">Concept Demo</div>
-          </div>
-
-          <div class="page-grid">
-            <div class="card">
-              <div class="card-header">
-                <div class="card-title">
-                  <span class="icon">🚲</span>
-                  <span>Bikes & Builds</span>
-                </div>
-                <div class="badge badge-ok">Ready</div>
-              </div>
-              <div class="card-subtitle">
-                Core bikes, frames and build states.
-              </div>
-              <ul class="list" id="dashboard-bikes-list">
-                <li>
-                  <span class="list-label">Relentless Attacks · Gravel build</span><br />
-                  <span>Frameset, drivetrain, wheels, cockpit, bags · build state tracked.</span>
-                </li>
-                <li>
-                  <span class="list-label">Jones Street Cycles · Commuter</span><br />
-                  <span>Everyday bike with spares mapped to jobs.</span>
-                </li>
-                <li>
-                  <span class="list-label">Workshop test rigs</span><br />
-                  <span>Brake test rig, wheel truing, drivetrain test stand.</span>
-                </li>
-              </ul>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <div class="card-title">
-                  <span class="icon">🧩</span>
-                  <span>Spares & Components</span>
-                </div>
-                <div class="badge badge-warn">Concept</div>
-              </div>
-              <div class="card-subtitle">
-                Spares mapped to bikes, jobs and locations.
-              </div>
-              <ul class="list" id="dashboard-spares-list">
-                <li>
-                  <span class="list-label">Tyres & tubes</span><br />
-                  <span>Gravel, road, commuter · sizes, valve types, locations.</span>
-                </li>
-                <li>
-                  <span class="list-label">Drivetrain</span><br />
-                  <span>Chains, cassettes, chainrings · wear state and job links.</span>
-                </li>
-                <li>
-                  <span class="list-label">Brakes & controls</span><br />
-                  <span>Pads, rotors, cables, levers · compatibility tracked.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-
-          <div class="page-grid" style="margin-top:12px;">
-            <div class="card">
-              <div class="card-header">
-                <div class="card-title">
-                  <span class="icon">🛠️</span>
-                  <span>Tools & Jigs</span>
-                </div>
-                <div class="badge badge-ok">Workshop</div>
-              </div>
-              <div class="card-subtitle">
-                Physical tools, 3D-printed jigs and fixtures.
-              </div>
-              <ul class="list" id="dashboard-tools-list">
-                <li>
-                  <span class="list-label">Core tools</span><br />
-                  <span>Hex keys, torque wrench, cable cutters, chain tools.</span>
-                </li>
-                <li>
-                  <span class="list-label">3D-printed jigs</span><br />
-                  <span>Brake pad alignment, rotor spacers, wheel dish gauges.</span>
-                </li>
-                <li>
-                  <span class="list-label">Workholding</span><br />
-                  <span>Bike stands, frame supports, bench fixtures.</span>
-                </li>
-              </ul>
-            </div>
-
-            <div class="card">
-              <div class="card-header">
-                <div class="card-title">
-                  <span class="icon">📋</span>
-                  <span>Repairs & Jobs</span>
-                </div>
-                <div class="badge badge-warn">Concept</div>
-              </div>
-              <div class="card-subtitle">
-                Jobs linked to bikes, spares and tools.
-              </div>
-              <ul class="list" id="dashboard-jobs-list">
-                <li>
-                  <span class="list-label">Brake service</span><br />
-                  <span>Pads, rotors, fluid/cables · tools and jigs mapped.</span>
-                </li>
-                <li>
-                  <span class="list-label">Drivetrain refresh</span><br />
-                  <span>Chain, cassette, chainring · wear tracking and spares mapping.</span>
-                </li>
-                <li>
-                  <span class="list-label">Wheel work</span><br />
-                  <span>Truing, spoke replacement, tyre swap · rig and tools linked.</span>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </section>
-
-        <!-- Bikes -->
-        <section class="page" id="page-bikes">
-          <div class="page-header">
-            <div>
-              <div class="page-title">Bikes & Frames</div>
-              <div class="page-subtitle">
-                Core bikes, framesets and build states.
-              </div>
-            </div>
-            <div class="badge badge-ok">Concept structure</div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">
-                <span class="icon">🚲</span>
-                <span>Example bikes</span>
-              </div>
-              <div class="badge">Demo only</div>
-            </div>
-            <div class="card-subtitle">
-              This is a concept layout for how bikes could be represented.
-            </div>
-            <ul class="list">
-              <li>
-                <span class="list-label">Relentless Attacks · Gravel bike</span><br />
-                <span>Frameset, fork, wheels, drivetrain, cockpit, bags.</span>
-                <div class="tag-row">
-                  <span class="tag tag-accent">Gravel</span>
-                  <span class="tag">1x drivetrain</span>
-                  <span class="tag">Tubeless</span>
-                  <span class="tag">Bikepacking-ready</span>
-                </div>
-              </li>
-              <li>
-                <span class="list-label">Jones Street Cycles · Commuter</span><br />
-                <span>City bike with racks, lights, fenders and robust spares mapping.</span>
-                <div class="tag-row">
-                  <span class="tag">Commuter</span>
-                  <span class="tag">Dynamo lights</span>
-                  <span class="tag">Rack & panniers</span>
-                </div>
-              </li>
-              <li>
-                <span class="list-label">Workshop test rigs</span><br />
-                <span>Dedicated frames for brake testing, drivetrain experiments and wheel work.</span>
-                <div class="tag-row">
-                  <span class="tag">Test rig</span>
-                  <span class="tag">Brake lab</span>
-                  <span class="tag">Wheel lab</span>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </section>
-
-        <!-- Spares -->
-        <section class="page" id="page-spares">
-          <div class="page-header">
-            <div>
-              <div class="page-title">Spares & Components</div>
-              <div class="page-subtitle">
-                Tyres, tubes, drivetrain, brakes, controls and more.
-              </div>
-            </div>
-            <div class="badge badge-warn">Concept structure</div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">
-                <span class="icon">🧩</span>
-                <span>Example spares mapping</span>
-              </div>
-              <div class="badge">Demo only</div>
-            </div>
-            <div class="card-subtitle">
-              Spares mapped to bikes, jobs, locations and compatibility.
-            </div>
-            <ul class="list">
-              <li>
-                <span class="list-label">Tyres & tubes</span><br />
-                <span>Gravel, road, commuter · sizes, valve types, rim compatibility.</span>
-                <div class="tag-row">
-                  <span class="tag">700c gravel</span>
-                  <span class="tag">650b</span>
-                  <span class="tag">Presta</span>
-                  <span class="tag">Schrader</span>
-                </div>
-              </li>
-              <li>
-                <span class="list-label">Drivetrain</span><br />
-                <span>Chains, cassettes, chainrings · speed, brand, wear state.</span>
-                <div class="tag-row">
-                  <span class="tag">11-speed</span>
-                  <span class="tag">12-speed</span>
-                  <span class="tag">Gravel-specific</span>
-                </div>
-              </li>
-              <li>
-                <span class="list-label">Brakes & controls</span><br />
-                <span>Pads, rotors, cables, levers · mechanical vs hydraulic, rotor sizes.</span>
-                <div class="tag-row">
-                  <span class="tag">160mm rotors</span>
-                  <span class="tag">180mm rotors</span>
-                  <span class="tag">Flat-mount</span>
-                  <span class="tag">Post-mount</span>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </section>
-
-        <!-- Tools -->
-        <section class="page" id="page-tools">
-          <div class="page-header">
-            <div>
-              <div class="page-title">Tools & Jigs</div>
-              <div class="page-subtitle">
-                Physical tools, 3D-printed jigs and fixtures.
-              </div>
-            </div>
-            <div class="badge badge-ok">Workshop concept</div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">
-                <span class="icon">🛠️</span>
-                <span>Example tools & jigs</span>
-              </div>
-              <div class="badge">Demo only</div>
-            </div>
-            <div class="card-subtitle">
-              Tools mapped to jobs, bikes and spares.
-            </div>
-            <ul class="list">
-              <li>
-                <span class="list-label">Core hand tools</span><br />
-                <span>Hex keys, torque wrench, cable cutters, chain tools.</span>
-              </li>
-              <li>
-                <span class="list-label">3D-printed jigs</span><br />
-                <span>Brake pad alignment, rotor spacers, wheel dish gauges.</span>
-              </li>
-              <li>
-                <span class="list-label">Workholding & stands</span><br />
-                <span>Bike stands, frame supports, bench fixtures.</span>
-              </li>
-            </ul>
-          </div>
-        </section>
-
-        <!-- Repairs -->
-        <section class="page" id="page-repairs">
-          <div class="page-header">
-            <div>
-              <div class="page-title">Repairs & Jobs</div>
-              <div class="page-subtitle">
-                Jobs linked to bikes, spares and tools.
-              </div>
-            </div>
-            <div class="badge badge-warn">Concept structure</div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">
-                <span class="icon">📋</span>
-                <span>Example jobs</span>
-              </div>
-              <div class="badge">Demo only</div>
-            </div>
-            <div class="card-subtitle">
-              Jobs as structured tasks with required spares and tools.
-            </div>
-            <ul class="list">
-              <li>
-                <span class="list-label">Brake service</span><br />
-                <span>Pads, rotors, fluid/cables · tools and jigs mapped.</span>
-              </li>
-              <li>
-                <span class="list-label">Drivetrain refresh</span><br />
-                <span>Chain, cassette, chainring · wear tracking and spares mapping.</span>
-              </li>
-              <li>
-                <span class="list-label">Wheel work</span><br />
-                <span>Truing, spoke replacement, tyre swap · rig and tools linked.</span>
-              </li>
-            </ul>
-          </div>
-        </section>
-
-        <!-- Community -->
-        <section class="page" id="page-community">
-          <div class="page-header">
-            <div>
-              <div class="page-title">Community & Sharing</div>
-              <div class="page-subtitle">
-                Sharing builds, spares lists and job templates.
-              </div>
-            </div>
-            <div class="badge">Concept</div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">
-                <span class="icon">👥</span>
-                <span>Concept: Sharing & collaboration</span>
-              </div>
-              <div class="badge">Idea space</div>
-            </div>
-            <div class="card-subtitle">
-              This page sketches how a community layer could work.
-            </div>
-            <p style="font-size:0.8rem;color:var(--muted);margin-top:6px;">
-              The Digital Bike Workshop could eventually support:
-            </p>
-            <ul class="list">
-              <li>
-                <span class="list-label">Shared build templates</span><br />
-                <span>Gravel, commuter, touring, cargo · reusable build patterns.</span>
-              </li>
-              <li>
-                <span class="list-label">Shared job templates</span><br />
-                <span>Brake service, drivetrain refresh, wheel work · standardised steps.</span>
-              </li>
-              <li>
-                <span class="list-label">Spares lists</span><br />
-                <span>Community-curated lists for specific bikes and use cases.</span>
-              </li>
-            </ul>
-          </div>
-        </section>
-
-        <!-- Admin -->
-        <section class="page" id="page-admin">
-          <div class="page-header">
-            <div>
-              <div class="page-title">Admin & Data</div>
-              <div class="page-subtitle">
-                Local-first data, backups and structure.
-              </div>
-            </div>
-            <div class="badge">Concept</div>
-          </div>
-
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">
-                <span class="icon">⚙️</span>
-                <span>Concept: Data model</span>
-              </div>
-              <div class="badge">Idea space</div>
-            </div>
-            <div class="card-subtitle">
-              High-level sketch of how data could be structured.
-            </div>
-            <ul class="list">
-              <li>
-                <span class="list-label">Local-first</span><br />
-                <span>Data stored locally first, with optional sync/export.</span>
-              </li>
-              <li>
-                <span class="list-label">Entities</span><br />
-                <span>Bikes, spares, tools, jobs, locations, people.</span>
-              </li>
-              <li>
-                <span class="list-label">Relationships</span><br />
-                <span>Jobs link bikes, spares and tools · spares map to locations.</span>
-              </li>
-            </ul>
-          </div>
-        </section>
-
-        <!-- Design Document -->
-        <section class="page" id="page-design-doc">
-          <div class="page-header">
-            <div>
-              <div class="page-title">Design Document</div>
-              <div class="page-subtitle">
-                Cycling Spares App concept · Digital Bike Workshop.
-              </div>
-            </div>
-            <div class="badge badge-ok">Concept narrative</div>
-          </div>
-
-          <div class="card design-doc">
-            <div class="card-header">
-              <div class="card-title">
-                <span class="icon">📘</span>
-                <span>Cycling Spares App · Digital Bike Workshop</span>
-              </div>
-              <div class="badge">Concept document</div>
-            </div>
-
-            <div class="design-doc-callout">
-              This page captures the concept narrative for the Cycling Spares App /
-              Digital Bike Workshop: a local-first, practical tool for managing bikes,
-              spares, jobs and tools in a real workshop.
-            </div>
-
-            <!-- Replace this block with your full concept text if you want to expand it further -->
-            <h1>Vision</h1>
-            <p>
-              The Cycling Spares App (Digital Bike Workshop) is a concept for a
-              local-first, practical tool that helps a rider or small workshop keep
-              track of bikes, spares, tools and jobs in a way that matches how work
-              actually happens on the bench.
-            </p>
-
-            <h2>Core ideas</h2>
-            <ul>
-              <li>
-                <strong>Local-first:</strong> Data lives with the workshop first,
-                with optional export or sync.
-              </li>
-              <li>
-                <strong>Bike-centric:</strong> Bikes and frames are the anchor
-                objects; spares, tools and jobs orbit them.
-              </li>
-              <li>
-                <strong>Job-focused:</strong> Jobs link bikes, spares and tools,
-                making it clear what is needed for each task.
-              </li>
-              <li>
-                <strong>Practical mapping:</strong> Spares are mapped to locations
-                (bins, boxes, shelves) and to compatibility (which bikes they fit).
-              </li>
-            </ul>
-
-            <h2>Entities</h2>
-            <h3>Bikes & frames</h3>
-            <p>
-              Bikes represent complete or in-progress builds. Framesets and test rigs
-              are treated as first-class objects, allowing the workshop to track
-              dedicated rigs for brake testing, drivetrain experiments and wheel work.
-            </p>
-
-            <h3>Spares & components</h3>
-            <p>
-              Spares include tyres, tubes, drivetrain parts, brakes, controls and
-              small hardware. Each spare can be mapped to:
-            </p>
-            <ul>
-              <li>One or more bikes (compatibility)</li>
-              <li>One or more jobs (where it is used)</li>
-              <li>One or more locations (where it physically lives)</li>
-            </ul>
-
-            <h3>Tools & jigs</h3>
-            <p>
-              Tools cover core hand tools, torque tools, cable tools and chain tools.
-              Jigs include 3D-printed fixtures, brake pad alignment tools, rotor
-              spacers and wheel dish gauges. Tools and jigs are linked to jobs so
-              each job has a clear tool list.
-            </p>
-
-            <h3>Jobs & tasks</h3>
-            <p>
-              Jobs are structured tasks such as brake service, drivetrain refresh or
-              wheel work. Each job links:
-            </p>
-            <ul>
-              <li>One or more bikes</li>
-              <li>Required spares</li>
-              <li>Required tools and jigs</li>
-              <li>Optional notes and steps</li>
-            </ul>
-
-            <h2>Workshop flow</h2>
-            <p>
-              The app is designed to mirror how a real workshop operates:
-            </p>
-            <ul>
-              <li>Identify a job on a bike.</li>
-              <li>Check spares availability and compatibility.</li>
-              <li>Check tools and jigs required.</li>
-              <li>Execute the job and update state (wear, usage, notes).</li>
-            </ul>
-
-            <h2>Local-first data</h2>
-            <p>
-              The concept emphasises local-first data: the workshop owns its data,
-              with optional export or sync. This keeps the tool lightweight, resilient
-              and focused on practical use rather than cloud complexity.
-            </p>
-
-            <h2>Future directions</h2>
-            <ul>
-              <li>Shared build templates for gravel, commuter, touring and cargo bikes.</li>
-              <li>Shared job templates for common tasks.</li>
-              <li>Community-curated spares lists for specific bikes and use cases.</li>
-            </ul>
-
-            <p>
-              This Design Document page is intentionally concise. It can be expanded
-              into a full specification, including data models, UI flows and
-              integration points, but for now it serves as a readable, embedded
-              concept inside the Digital Bike Workshop app.
-            </p>
-          </div>
-        </section>
-      </main>
-
-      <!-- Footer -->
-      <footer class="footer">
-        <span>Version 1.0 — September 2026</span>
-        <span>© Adam Otis Farrugia</span>
-      </footer>
-    </div>
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div id="login-box">
+    <h1>Digital Bike Workshop</h1>
+    <input id="login-username" type="text" placeholder="Username" />
+    <input id="login-password" type="password" placeholder="Password" />
+    <button id="login-btn">Login</button>
+    <div id="create-account-link">Create Account</div>
   </div>
+</div>
 
-  <script>
-    // Simple page navigation
-    const navItems = document.querySelectorAll(".nav-item");
-    const pages = document.querySelectorAll(".page");
+<!-- CREATE ACCOUNT MODAL -->
+<div id="create-account-modal">
+  <div id="create-account-box">
+    <h2>Create Account</h2>
+    <input id="new-username" type="text" placeholder="Choose a username" />
+    <input id="new-password" type="password" placeholder="Choose a password" />
+    <button id="create-account-btn">Create</button>
+    <div id="cancel-create">Cancel</div>
+  </div>
+</div>
 
-    function showPage(pageId) {
-      pages.forEach(p => {
-        p.classList.toggle("active", p.id === "page-" + pageId);
-      });
-      navItems.forEach(item => {
-        item.classList.toggle("active", item.dataset.page === pageId);
+<script>
+/* ============================
+   SECTION 1 — LOGIN LOGIC
+   ============================ */
+
+let db = null;
+let currentUser = null;
+
+const DB_NAME = "bikeWorkshopDB";
+const DB_VERSION = 1;
+
+/* Open DB */
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+
+    req.onupgradeneeded = (event) => {
+      const db = event.target.result;
+
+      /* USERS */
+      if (!db.objectStoreNames.contains("users")) {
+        const users = db.createObjectStore("users", { keyPath: "id", autoIncrement: true });
+        users.createIndex("username", "username", { unique: true });
+        users.createIndex("role", "role", { unique: false });
+      }
+
+      /* PER-USER BIKES */
+      if (!db.objectStoreNames.contains("bikes")) {
+        const bikes = db.createObjectStore("bikes", { keyPath: "id", autoIncrement: true });
+        bikes.createIndex("ownerId", "ownerId", { unique: false });
+      }
+
+      /* PER-USER JOBS */
+      if (!db.objectStoreNames.contains("jobs")) {
+        const jobs = db.createObjectStore("jobs", { keyPath: "id", autoIncrement: true });
+        jobs.createIndex("ownerId", "ownerId", { unique: false });
+      }
+
+      /* SHARED SPARES */
+      if (!db.objectStoreNames.contains("spares")) {
+        db.createObjectStore("spares", { keyPath: "id", autoIncrement: true });
+      }
+
+      /* SHARED TOOLS */
+      if (!db.objectStoreNames.contains("tools")) {
+        db.createObjectStore("tools", { keyPath: "id", autoIncrement: true });
+      }
+
+      /* SHARED LOCATIONS */
+      if (!db.objectStoreNames.contains("locations")) {
+        db.createObjectStore("locations", { keyPath: "id", autoIncrement: true });
+      }
+
+      /* SHARED JOB TEMPLATES */
+      if (!db.objectStoreNames.contains("jobTemplates")) {
+        db.createObjectStore("jobTemplates", { keyPath: "id", autoIncrement: true });
+      }
+    };
+
+    req.onsuccess = (event) => {
+      db = event.target.result;
+      resolve(db);
+    };
+
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* Seed admin account */
+async function seedAdminIfNeeded() {
+  const tx = db.transaction("users", "readwrite");
+  const store = tx.objectStore("users");
+  const index = store.index("username");
+
+  return new Promise((resolve, reject) => {
+    const req = index.get("admin");
+    req.onsuccess = () => {
+      if (req.result) {
+        resolve();
+      } else {
+        store.add({
+          username: "admin",
+          password: "workshop",
+          role: "administrator",
+          createdAt: Date.now()
+        });
+        resolve();
+      }
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* Login */
+async function login(username, password) {
+  const tx = db.transaction("users", "readonly");
+  const store = tx.objectStore("users");
+  const index = store.index("username");
+
+  return new Promise((resolve, reject) => {
+    const req = index.get(username);
+    req.onsuccess = () => {
+      const user = req.result;
+      if (!user || user.password !== password) {
+        reject(new Error("Invalid credentials"));
+        return;
+      }
+      currentUser = { id: user.id, username: user.username, role: user.role };
+      localStorage.setItem("bikeWorkshopSession", JSON.stringify(currentUser));
+      resolve(currentUser);
+    };
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* Create Account */
+async function createAccount(username, password) {
+  const tx = db.transaction("users", "readwrite");
+  const store = tx.objectStore("users");
+  return new Promise((resolve, reject) => {
+    const req = store.add({
+      username,
+      password,
+      role: "user",
+      createdAt: Date.now()
+    });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* UI Hooks */
+document.getElementById("login-btn").onclick = async () => {
+  const u = document.getElementById("login-username").value.trim();
+  const p = document.getElementById("login-password").value.trim();
+
+  try {
+    await login(u, p);
+    document.getElementById("login-screen").style.display = "none";
+    // Workshop UI will appear once SECTION 3 is added
+  } catch (err) {
+    alert("Invalid username or password");
+  }
+};
+
+document.getElementById("create-account-link").onclick = () => {
+  document.getElementById("create-account-modal").style.display = "flex";
+};
+
+document.getElementById("cancel-create").onclick = () => {
+  document.getElementById("create-account-modal").style.display = "none";
+};
+
+document.getElementById("create-account-btn").onclick = async () => {
+  const u = document.getElementById("new-username").value.trim();
+  const p = document.getElementById("new-password").value.trim();
+
+  if (!u || !p) {
+    alert("Enter username and password");
+    return;
+  }
+
+  try {
+    await createAccount(u, p);
+    alert("Account created. You can now log in.");
+    document.getElementById("create-account-modal").style.display = "none";
+  } catch (err) {
+    alert("Username already exists");
+  }
+};
+
+/* Initialize DB + seed admin */
+openDatabase().then(seedAdminIfNeeded);
+</script>
+<script>
+/* ============================
+   SECTION 2 — DATA HELPERS
+   Hybrid: shared spares/tools,
+   per-user bikes/jobs
+   ============================ */
+
+/* ---- Bikes (per-user) ---- */
+async function addBike(bike) {
+  if (!currentUser) throw new Error("Not logged in");
+  const tx = db.transaction("bikes", "readwrite");
+  const store = tx.objectStore("bikes");
+  return new Promise((resolve, reject) => {
+    const req = store.add({
+      ...bike,
+      ownerId: currentUser.id,
+      createdAt: Date.now()
+    });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getMyBikes() {
+  if (!currentUser) throw new Error("Not logged in");
+  const tx = db.transaction("bikes", "readonly");
+  const store = tx.objectStore("bikes");
+  const index = store.index("ownerId");
+  return new Promise((resolve, reject) => {
+    const req = index.getAll(currentUser.id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function updateBike(id, patch) {
+  const tx = db.transaction("bikes", "readwrite");
+  const store = tx.objectStore("bikes");
+  return new Promise((resolve, reject) => {
+    const getReq = store.get(id);
+    getReq.onsuccess = () => {
+      const bike = getReq.result;
+      if (!bike) { reject(new Error("Bike not found")); return; }
+      const putReq = store.put({ ...bike, ...patch });
+      putReq.onsuccess = () => resolve();
+      putReq.onerror = () => reject(putReq.error);
+    };
+    getReq.onerror = () => reject(getReq.error);
+  });
+}
+
+async function deleteBike(id) {
+  const tx = db.transaction("bikes", "readwrite");
+  const store = tx.objectStore("bikes");
+  return new Promise((resolve, reject) => {
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* ---- Jobs (per-user) ---- */
+async function addJob(job) {
+  if (!currentUser) throw new Error("Not logged in");
+  const tx = db.transaction("jobs", "readwrite");
+  const store = tx.objectStore("jobs");
+  return new Promise((resolve, reject) => {
+    const req = store.add({
+      ...job,
+      ownerId: currentUser.id,
+      createdAt: Date.now()
+    });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getMyJobs() {
+  if (!currentUser) throw new Error("Not logged in");
+  const tx = db.transaction("jobs", "readonly");
+  const store = tx.objectStore("jobs");
+  const index = store.index("ownerId");
+  return new Promise((resolve, reject) => {
+    const req = index.getAll(currentUser.id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function updateJob(id, patch) {
+  const tx = db.transaction("jobs", "readwrite");
+  const store = tx.objectStore("jobs");
+  return new Promise((resolve, reject) => {
+    const getReq = store.get(id);
+    getReq.onsuccess = () => {
+      const job = getReq.result;
+      if (!job) { reject(new Error("Job not found")); return; }
+      const putReq = store.put({ ...job, ...patch });
+      putReq.onsuccess = () => resolve();
+      putReq.onerror = () => reject(putReq.error);
+    };
+    getReq.onerror = () => reject(getReq.error);
+  });
+}
+
+async function deleteJob(id) {
+  const tx = db.transaction("jobs", "readwrite");
+  const store = tx.objectStore("jobs");
+  return new Promise((resolve, reject) => {
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* ---- Shared Spares ---- */
+async function addSpare(spare) {
+  const tx = db.transaction("spares", "readwrite");
+  const store = tx.objectStore("spares");
+  return new Promise((resolve, reject) => {
+    const req = store.add({
+      ...spare,
+      createdAt: Date.now()
+    });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getAllSpares() {
+  const tx = db.transaction("spares", "readonly");
+  const store = tx.objectStore("spares");
+  return new Promise((resolve, reject) => {
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function updateSpare(id, patch) {
+  const tx = db.transaction("spares", "readwrite");
+  const store = tx.objectStore("spares");
+  return new Promise((resolve, reject) => {
+    const getReq = store.get(id);
+    getReq.onsuccess = () => {
+      const spare = getReq.result;
+      if (!spare) { reject(new Error("Spare not found")); return; }
+      const putReq = store.put({ ...spare, ...patch });
+      putReq.onsuccess = () => resolve();
+      putReq.onerror = () => reject(putReq.error);
+    };
+    getReq.onerror = () => reject(getReq.error);
+  });
+}
+
+async function deleteSpare(id) {
+  const tx = db.transaction("spares", "readwrite");
+  const store = tx.objectStore("spares");
+  return new Promise((resolve, reject) => {
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* ---- Shared Tools ---- */
+async function addTool(tool) {
+  const tx = db.transaction("tools", "readwrite");
+  const store = tx.objectStore("tools");
+  return new Promise((resolve, reject) => {
+    const req = store.add({
+      ...tool,
+      createdAt: Date.now()
+    });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getAllTools() {
+  const tx = db.transaction("tools", "readonly");
+  const store = tx.objectStore("tools");
+  return new Promise((resolve, reject) => {
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function updateTool(id, patch) {
+  const tx = db.transaction("tools", "readwrite");
+  const store = tx.objectStore("tools");
+  return new Promise((resolve, reject) => {
+    const getReq = store.get(id);
+    getReq.onsuccess = () => {
+      const tool = getReq.result;
+      if (!tool) { reject(new Error("Tool not found")); return; }
+      const putReq = store.put({ ...tool, ...patch });
+      putReq.onsuccess = () => resolve();
+      putReq.onerror = () => reject(putReq.error);
+    };
+    getReq.onerror = () => reject(getReq.error);
+  });
+}
+
+async function deleteTool(id) {
+  const tx = db.transaction("tools", "readwrite");
+  const store = tx.objectStore("tools");
+  return new Promise((resolve, reject) => {
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* ---- Shared Locations ---- */
+async function addLocation(location) {
+  const tx = db.transaction("locations", "readwrite");
+  const store = tx.objectStore("locations");
+  return new Promise((resolve, reject) => {
+    const req = store.add({
+      ...location,
+      createdAt: Date.now()
+    });
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function getAllLocations() {
+  const tx = db.transaction("locations", "readonly");
+  const store = tx.objectStore
+<!-- WORKSHOP APP SHELL -->
+<div class="app-shell" id="app-shell" style="display:none;">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div>
+      <div class="sidebar-title">Digital Bike Workshop</div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-top:4px;">
+        Relentless Attacks · Jones Street Cycles
+      </div>
+    </div>
+
+    <div>
+      <div class="nav-section-label">Workshop</div>
+      <ul class="nav-list">
+        <li class="nav-item active" data-page="dashboard">
+          <span class="icon">🏁</span>
+          <span>Dashboard</span>
+        </li>
+        <li class="nav-item" data-page="bikes">
+          <span class="icon">🚲</span>
+          <span>Bikes</span>
+        </li>
+        <li class="nav-item" data-page="spares">
+          <span class="icon">🧩</span>
+          <span>Spares</span>
+        </li>
+        <li class="nav-item" data-page="tools">
+          <span class="icon">🛠️</span>
+          <span>Tools</span>
+        </li>
+        <li class="nav-item" data-page="jobs">
+          <span class="icon">📋</span>
+          <span>Jobs</span>
+        </li>
+        <li class="nav-item" data-page="locations">
+          <span class="icon">📦</span>
+          <span>Locations</span>
+        </li>
+      </ul>
+    </div>
+
+    <div>
+      <div class="nav-section-label">Admin</div>
+      <ul class="nav-list">
+        <li class="nav-item" data-page="admin">
+          <span class="icon">⚙️</span>
+          <span>Admin</span>
+        </li>
+        <li class="nav-item" data-page="design-doc">
+          <span class="icon">📘</span>
+          <span>Design Document</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="sidebar-footer">
+      <div>Digital Bike Workshop · Local-first</div>
+      <div style="margin-top:4px;">Relentless Attacks · Jones Street Cycles</div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo-circle">
+          <img src="logo.png" alt="Workshop Logo" />
+        </div>
+        <div class="header-title">
+          <div class="header-title-main">Digital Bike Workshop</div>
+          <div class="header-title-sub">
+            Cycling spares, jobs, tools & community · Local-first
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="pill pill-accent">Logged in as: <span id="header-username"></span></div>
+        <div class="pill" id="logout-btn" style="cursor:pointer;">Logout</div>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="content">
+
+      <!-- DASHBOARD -->
+      <section class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Workshop Overview</div>
+            <div class="page-subtitle">Your bikes, spares, tools and jobs.</div>
+          </div>
+          <div class="badge badge-ok">Live</div>
+        </div>
+
+        <div class="page-grid">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">🚲</span>Bikes</div>
+              <div class="badge badge-ok">Per-user</div>
+            </div>
+            <ul class="list" id="dashboard-bikes"></ul>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">🧩</span>Spares</div>
+              <div class="badge badge-warn">Shared</div>
+            </div>
+            <ul class="list" id="dashboard-spares"></ul>
+          </div>
+        </div>
+
+        <div class="page-grid" style="margin-top:12px;">
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">🛠️</span>Tools</div>
+              <div class="badge badge-ok">Shared</div>
+            </div>
+            <ul class="list" id="dashboard-tools"></ul>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title"><span class="icon">📋</span>Jobs</div>
+              <div class="badge badge-warn">Per-user</div>
+            </div>
+            <ul class="list" id="dashboard-jobs"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- BIKES PAGE -->
+      <section class="page" id="page-bikes">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Bikes</div>
+            <div class="page-subtitle">Your personal bikes.</div>
+          </div>
+          <button class="pill pill-accent" id="add-bike-btn">Add Bike</button>
+        </div>
+        <div id="bikes-list"></div>
+      </section>
+
+      <!-- SPARES PAGE -->
+      <section class="page" id="page-spares">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Spares</div>
+            <div class="page-subtitle">Shared workshop spares.</div>
+          </div>
+          <button class="pill pill-accent" id="add-spare-btn">Add Spare</button>
+        </div>
+        <div id="spares-list"></div>
+      </section>
+
+      <!-- TOOLS PAGE -->
+      <section class="page" id="page-tools">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Tools</div>
+            <div class="page-subtitle">Shared workshop tools.</div>
+          </div>
+          <button class="pill pill-accent" id="add-tool-btn">Add Tool</button>
+        </div>
+        <div id="tools-list"></div>
+      </section>
+
+      <!-- JOBS PAGE -->
+      <section class="page" id="page-jobs">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Jobs</div>
+            <div class="page-subtitle">Your personal jobs.</div>
+          </div>
+          <button class="pill pill-accent" id="add-job-btn">Add Job</button>
+        </div>
+        <div id="jobs-list"></div>
+      </section>
+
+      <!-- LOCATIONS PAGE -->
+      <section class="page" id="page-locations">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Locations</div>
+            <div class="page-subtitle">Shared storage locations.</div>
+          </div>
+          <button class="pill pill-accent" id="add-location-btn">Add Location</button>
+        </div>
+        <div id="locations-list"></div>
+      </section>
+
+      <!-- ADMIN PAGE -->
+      <section class="page" id="page-admin">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Admin</div>
+            <div class="page-subtitle">Administrator tools.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><span class="icon">⚙️</span>Database Tools</div>
+          </div>
+          <button class="pill pill-accent" id="export-db-btn">Export Database</button>
+          <button class="pill pill-danger" id="clear-db-btn">Clear Database</button>
+        </div>
+      </section>
+
+      <!-- DESIGN DOC PAGE -->
+      <section class="page" id="page-design-doc">
+        <div class="page-header">
+          <div>
+            <div class="page-title">Design Document</div>
+            <div class="page-subtitle">Concept narrative.</div>
+          </div>
+        </div>
+
+        <div class="card design-doc">
+          <h1>Cycling Spares App · Digital Bike Workshop</h1>
+          <p>This page will contain your full design document.</p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <span>Version 1.0 — September 2026</span>
+      <span>© Adam Otis Farrugia</span>
+    </footer>
+  </div>
+</div>
+
+<script>
+/* ============================
+   SECTION 3 — PAGE SWITCHING
+   ============================ */
+
+const navItems = document.querySelectorAll(".nav-item");
+const pages = document.querySelectorAll(".page");
+
+function showPage(pageId) {
+  pages.forEach(p => p.classList.toggle("active", p.id === "page-" + pageId));
+  navItems.forEach(item => item.classList.toggle("active", item.dataset.page === pageId));
+}
+
+navItems.forEach(item => {
+  item.addEventListener("click", () => {
+    showPage(item.dataset.page);
+  });
+});
+
+/* Show workshop after login */
+function showWorkshopUI() {
+  document.getElementById("app-shell").style.display = "grid";
+  document.getElementById("header-username").textContent = currentUser.username;
+}
+
+/* Logout */
+document.getElementById("logout-btn").onclick = () => {
+  currentUser = null;
+  localStorage.removeItem("bikeWorkshopSession");
+  location.reload();
+};
+
+/* Auto-login if session exists */
+const savedSession = localStorage.getItem("bikeWorkshopSession");
+if (savedSession) {
+  currentUser = JSON.parse(savedSession);
+  document.getElementById("login-screen").style.display = "none";
+  showWorkshopUI();
+}
+</script>
+<!-- ============================
+     SECTION 4 — CRUD MODALS
+     ============================ -->
+
+<style>
+  /* Simple modal styling */
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+  }
+
+  .modal-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 20px;
+    border-radius: 12px;
+    width: 360px;
+    box-shadow: 0 10px 25px rgba(15,23,42,0.6);
+  }
+
+  .modal-box h2 {
+    margin-bottom: 10px;
+  }
+
+  .modal-box input,
+  .modal-box textarea {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: #0f172a;
+    color: var(--text);
+  }
+
+  .modal-box button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 14px;
+    border-radius: 8px;
+    border: 1px solid var(--accent);
+    background: var(--accent-soft);
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  .modal-cancel {
+    margin-top: 10px;
+    text-align: center;
+    color: var(--muted);
+    cursor: pointer;
+  }
+</style>
+
+<!-- BIKE MODAL -->
+<div class="modal" id="modal-bike">
+  <div class="modal-box">
+    <h2 id="bike-modal-title">Add Bike</h2>
+    <input id="bike-name" placeholder="Bike name" />
+    <input id="bike-type" placeholder="Type (gravel, road, etc.)" />
+    <textarea id="bike-notes" placeholder="Notes"></textarea>
+    <button id="bike-save-btn">Save</button>
+    <div class="modal-cancel" onclick="closeBikeModal()">Cancel</div>
+  </div>
+</div>
+
+<!-- SPARE MODAL -->
+<div class="modal" id="modal-spare">
+  <div class="modal-box">
+    <h2 id="spare-modal-title">Add Spare</h2>
+    <input id="spare-name" placeholder="Spare name" />
+    <input id="spare-category" placeholder="Category (tyre, tube, etc.)" />
+    <textarea id="spare-notes" placeholder="Notes"></textarea>
+    <button id="spare-save-btn">Save</button>
+    <div class="modal-cancel" onclick="closeSpareModal()">Cancel</div>
+  </div>
+</div>
+
+<!-- TOOL MODAL -->
+<div class="modal" id="modal-tool">
+  <div class="modal-box">
+    <h2 id="tool-modal-title">Add Tool</h2>
+    <input id="tool-name" placeholder="Tool name" />
+    <input id="tool-type" placeholder="Type (hex key, torque wrench, etc.)" />
+    <textarea id="tool-notes" placeholder="Notes"></textarea>
+    <button id="tool-save-btn">Save</button>
+    <div class="modal-cancel" onclick="closeToolModal()">Cancel</div>
+  </div>
+</div>
+
+<!-- JOB MODAL -->
+<div class="modal" id="modal-job">
+  <div class="modal-box">
+    <h2 id="job-modal-title">Add Job</h2>
+    <input id="job-name" placeholder="Job name" />
+    <textarea id="job-notes" placeholder="Notes"></textarea>
+    <button id="job-save-btn">Save</button>
+    <div class="modal-cancel" onclick="closeJobModal()">Cancel</div>
+  </div>
+</div>
+
+<!-- LOCATION MODAL -->
+<div class="modal" id="modal-location">
+  <div class="modal-box">
+    <h2 id="location-modal-title">Add Location</h2>
+    <input id="location-name" placeholder="Location name" />
+    <textarea id="location-notes" placeholder="Notes"></textarea>
+    <button id="location-save-btn">Save</button>
+    <div class="modal-cancel" onclick="closeLocationModal()">Cancel</div>
+  </div>
+</div>
+
+<script>
+/* ============================
+   SECTION 4 — CRUD LOGIC
+   ============================ */
+
+let editingBikeId = null;
+let editingSpareId = null;
+let editingToolId = null;
+let editingJobId = null;
+let editingLocationId = null;
+
+/* ---------------------------
+   BIKE MODAL
+   --------------------------- */
+function openBikeModal(bike = null) {
+  const modal = document.getElementById("modal-bike");
+  modal.style.display = "flex";
+
+  if (bike) {
+    editingBikeId = bike.id;
+    document.getElementById("bike-modal-title").textContent = "Edit Bike";
+    document.getElementById("bike-name").value = bike.name;
+    document.getElementById("bike-type").value = bike.type;
+    document.getElementById("bike-notes").value = bike.notes || "";
+  } else {
+    editingBikeId = null;
+    document.getElementById("bike-modal-title").textContent = "Add Bike";
+    document.getElementById("bike-name").value = "";
+    document.getElementById("bike-type").value = "";
+    document.getElementById("bike-notes").value = "";
+  }
+}
+
+function closeBikeModal() {
+  document.getElementById("modal-bike").style.display = "none";
+}
+
+document.getElementById("add-bike-btn").onclick = () => openBikeModal();
+
+document.getElementById("bike-save-btn").onclick = async () => {
+  const name = document.getElementById("bike-name").value.trim();
+  const type = document.getElementById("bike-type").value.trim();
+  const notes = document.getElementById("bike-notes").value.trim();
+
+  if (!name) { alert("Bike name required"); return; }
+
+  if (editingBikeId) {
+    await updateBike(editingBikeId, { name, type, notes });
+  } else {
+    await addBike({ name, type, notes });
+  }
+
+  closeBikeModal();
+  renderBikes();
+  renderDashboard();
+};
+
+/* ---------------------------
+   SPARE MODAL
+   --------------------------- */
+function openSpareModal(spare = null) {
+  const modal = document.getElementById("modal-spare");
+  modal.style.display = "flex";
+
+  if (spare) {
+    editingSpareId = spare.id;
+    document.getElementById("spare-modal-title").textContent = "Edit Spare";
+    document.getElementById("spare-name").value = spare.name;
+    document.getElementById("spare-category").value = spare.category;
+    document.getElementById("spare-notes").value = spare.notes || "";
+  } else {
+    editingSpareId = null;
+    document.getElementById("spare-modal-title").textContent = "Add Spare";
+    document.getElementById("spare-name").value = "";
+    document.getElementById("spare-category").value = "";
+    document.getElementById("spare-notes").value = "";
+  }
+}
+
+function closeSpareModal() {
+  document.getElementById("modal-spare").style.display = "none";
+}
+
+document.getElementById("add-spare-btn").onclick = () => openSpareModal();
+
+document.getElementById("spare-save-btn").onclick = async () => {
+  const name = document.getElementById("spare-name").value.trim();
+  const category = document.getElementById("spare-category").value.trim();
+  const notes = document.getElementById("spare-notes").value.trim();
+
+  if (!name) { alert("Spare name required"); return; }
+
+  if (editingSpareId) {
+    await updateSpare(editingSpareId, { name, category, notes });
+  } else {
+    await addSpare({ name, category, notes });
+  }
+
+  closeSpareModal();
+  renderSpares();
+  renderDashboard();
+};
+
+/* ---------------------------
+   TOOL MODAL
+   --------------------------- */
+function openToolModal(tool = null) {
+  const modal = document.getElementById("modal-tool");
+  modal.style.display = "flex";
+
+  if (tool) {
+    editingToolId = tool.id;
+    document.getElementById("tool-modal-title").textContent = "Edit Tool";
+    document.getElementById("tool-name").value = tool.name;
+    document.getElementById("tool-type").value = tool.type;
+    document.getElementById("tool-notes").value = tool.notes || "";
+  } else {
+    editingToolId = null;
+    document.getElementById("tool-modal-title").textContent = "Add Tool";
+    document.getElementById("tool-name").value = "";
+    document.getElementById("tool-type").value = "";
+    document.getElementById("tool-notes").value = "";
+  }
+}
+
+function closeToolModal() {
+  document.getElementById("modal-tool").style.display = "none";
+}
+
+document.getElementById("add-tool-btn").onclick = () => openToolModal();
+
+document.getElementById("tool-save-btn").onclick = async () => {
+  const name = document.getElementById("tool-name").value.trim();
+  const type = document.getElementById("tool-type").value.trim();
+  const notes = document.getElementById("tool-notes").value.trim();
+
+  if (!name) { alert("Tool name required"); return; }
+
+  if (editingToolId) {
+    await updateTool(editingToolId, { name, type, notes });
+  } else {
+    await addTool({ name, type, notes });
+  }
+
+  closeToolModal();
+  renderTools();
+  renderDashboard();
+};
+
+/* ---------------------------
+   JOB MODAL
+   --------------------------- */
+function openJobModal(job = null) {
+  const modal = document.getElementById("modal-job");
+  modal.style.display = "flex";
+
+  if (job) {
+    editingJobId = job.id;
+    document.getElementById("job-modal-title").textContent = "Edit Job";
+    document.getElementById("job-name").value = job.name;
+    document.getElementById("job-notes").value = job.notes || "";
+  } else {
+    editingJobId = null;
+    document.getElementById("job-modal-title").textContent = "Add Job";
+    document.getElementById("job-name").value = "";
+    document.getElementById("job-notes").value = "";
+  }
+}
+
+function closeJobModal() {
+  document.getElementById("modal-job").style.display = "none";
+}
+
+document.getElementById("add-job-btn").onclick = () => openJobModal();
+
+document.getElementById("job-save-btn").onclick = async () => {
+  const name = document.getElementById("job-name").value.trim();
+  const notes = document.getElementById("job-notes").value.trim();
+
+  if (!name) { alert("Job name required"); return; }
+
+  if (editingJobId) {
+    await updateJob(editingJobId, { name, notes });
+  } else {
+    await addJob({ name, notes });
+  }
+
+  closeJobModal();
+  renderJobs();
+  renderDashboard();
+};
+
+/* ---------------------------
+   LOCATION MODAL
+   --------------------------- */
+function openLocationModal(loc = null) {
+  const modal = document.getElementById("modal-location");
+  modal.style.display = "flex";
+
+  if (loc) {
+    editingLocationId = loc.id;
+    document.getElementById("location-modal-title").textContent = "Edit Location";
+    document.getElementById("location-name").value = loc.name;
+    document.getElementById("location-notes").value = loc.notes || "";
+  } else {
+    editingLocationId = null;
+    document.getElementById("location-modal-title").textContent = "Add Location";
+    document.getElementById("location-name").value = "";
+    document.getElementById("location-notes").value = "";
+  }
+}
+
+function closeLocationModal() {
+  document.getElementById("modal-location").style.display = "none";
+}
+
+document.getElementById("add-location-btn").onclick = () => openLocationModal();
+
+document.getElementById("location-save-btn").onclick = async () => {
+  const name = document.getElementById("location-name").value.trim();
+  const notes = document.getElementById("location-notes").value.trim();
+
+  if (!name) { alert("Location name required"); return; }
+
+  if (editingLocationId) {
+    await updateLocation(editingLocationId, { name, notes });
+  } else {
+    await addLocation({ name, notes });
+  }
+
+  closeLocationModal();
+  renderLocations();
+  renderDashboard();
+};
+
+/* ============================
+   RENDER FUNCTIONS
+   ============================ */
+
+async function renderBikes() {
+  const bikes = await getMyBikes();
+  const container = document.getElementById("bikes-list");
+  container.innerHTML = "";
+
+  bikes.forEach(bike => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${bike.name}</div>
+        <div class="badge">${bike.type || ""}</div>
+      </div>
+      <p>${bike.notes || ""}</p>
+      <button class="pill pill-accent" onclick='openBikeModal(${JSON.stringify(bike)})'>Edit</button>
+      <button class="pill pill-danger" onclick='deleteBike(${bike.id}).then(renderBikes).then(renderDashboard)'>Delete</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function renderSpares() {
+  const spares = await getAllSpares();
+  const container = document.getElementById("spares-list");
+  container.innerHTML = "";
+
+  spares.forEach(spare => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${spare.name}</div>
+        <div class="badge">${spare.category || ""}</div>
+      </div>
+      <p>${spare.notes || ""}</p>
+      <button class="pill pill-accent" onclick='openSpareModal(${JSON.stringify(spare)})'>Edit</button>
+      <button class="pill pill-danger" onclick='deleteSpare(${spare.id}).then(renderSpares).then(renderDashboard)'>Delete</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function renderTools() {
+  const tools = await getAllTools();
+  const container = document.getElementById("tools-list");
+  container.innerHTML = "";
+
+  tools.forEach(tool => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${tool.name}</div>
+        <div class="badge">${tool.type || ""}</div>
+      </div>
+      <p>${tool.notes || ""}</p>
+      <button class="pill pill-accent" onclick='openToolModal(${JSON.stringify(tool)})'>Edit</button>
+      <button class="pill pill-danger" onclick='deleteTool(${tool.id}).then(renderTools).then(renderDashboard)'>Delete</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function renderJobs() {
+  const jobs = await getMyJobs();
+  const container = document.getElementById("jobs-list");
+  container.innerHTML = "";
+
+  jobs.forEach(job => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${job.name}</div>
+      </div>
+      <p>${job.notes || ""}</p>
+      <button class="pill pill-accent" onclick='openJobModal(${JSON.stringify(job)})'>Edit</button>
+      <button class="pill pill-danger" onclick='deleteJob(${job.id}).then(renderJobs).then(renderDashboard)'>Delete</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+async function renderLocations() {
+  const locations = await getAllLocations();
+  const container = document.getElementById("locations-list");
+  container.innerHTML = "";
+
+  locations.forEach(loc => {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${loc.name}</div>
+      </div>
+      <p>${loc.notes || ""}</p>
+      <button class="pill pill-accent" onclick='openLocationModal(${JSON.stringify(loc)})'>Edit</button>
+      <button class="pill pill-danger" onclick='deleteLocation(${loc.id}).then(renderLocations).then(renderDashboard)'>Delete</button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+/* ============================
+   DASHBOARD RENDER
+   ============================ */
+
+async function renderDashboard() {
+  const bikes = await getMyBikes();
+  const spares = await getAllSpares();
+  const tools = await getAllTools();
+  const jobs = await getMyJobs();
+
+  const dbBikes = document.getElementById("dashboard-bikes");
+  const dbSpares = document.getElementById("dashboard-spares");
+  const dbTools = document.getElementById("dashboard-tools");
+  const dbJobs = document.getElementById("dashboard-jobs");
+
+  dbBikes.innerHTML = bikes.map(b => `<li>${b.name}</li>`).join("");
+  dbSpares.innerHTML = spares.map(s => `<li>${s.name}</li>`).join("");
+  dbTools.innerHTML = tools.map(t => `<li>${t.name}</li>`).join("");
+  dbJobs
+<script>
+/* ============================
+   SECTION 5 — LINKING LOGIC
+   ============================ */
+
+/*
+  Linking model:
+
+  Bikes:
+    - linkedSpares: [spareId]
+    - linkedJobs:   [jobId]
+
+  Spares:
+    - locationId: locationId
+
+  Jobs:
+    - linkedTools: [toolId]
+    - bikeId:      bikeId
+
+  Tools:
+    - no direct links (jobs link to tools)
+
+  Locations:
+    - no direct links (spares link to locations)
+*/
+
+/* ---------------------------
+   Helper: get item by ID
+   --------------------------- */
+async function getById(storeName, id) {
+  const tx = db.transaction(storeName, "readonly");
+  const store = tx.objectStore(storeName);
+  return new Promise((resolve, reject) => {
+    const req = store.get(id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* ---------------------------
+   Linking Spares → Bikes
+   --------------------------- */
+async function linkSpareToBike(bikeId, spareId) {
+  const bike = await getById("bikes", bikeId);
+  if (!bike.linkedSpares) bike.linkedSpares = [];
+  if (!bike.linkedSpares.includes(spareId)) {
+    bike.linkedSpares.push(spareId);
+  }
+  await updateBike(bikeId, { linkedSpares: bike.linkedSpares });
+}
+
+async function unlinkSpareFromBike(bikeId, spareId) {
+  const bike = await getById("bikes", bikeId);
+  bike.linkedSpares = (bike.linkedSpares || []).filter(id => id !== spareId);
+  await updateBike(bikeId, { linkedSpares: bike.linkedSpares });
+}
+
+/* ---------------------------
+   Linking Tools → Jobs
+   --------------------------- */
+async function linkToolToJob(jobId, toolId) {
+  const job = await getById("jobs", jobId);
+  if (!job.linkedTools) job.linkedTools = [];
+  if (!job.linkedTools.includes(toolId)) {
+    job.linkedTools.push(toolId);
+  }
+  await updateJob(jobId, { linkedTools: job.linkedTools });
+}
+
+async function unlinkToolFromJob(jobId, toolId) {
+  const job = await getById("jobs", jobId);
+  job.linkedTools = (job.linkedTools || []).filter(id => id !== toolId);
+  await updateJob(jobId, { linkedTools: job.linkedTools });
+}
+
+/* ---------------------------
+   Linking Jobs → Bikes
+   --------------------------- */
+async function linkJobToBike(jobId, bikeId) {
+  await updateJob(jobId, { bikeId });
+}
+
+async function unlinkJobFromBike(jobId) {
+  await updateJob(jobId, { bikeId: null });
+}
+
+/* ---------------------------
+   Linking Locations → Spares
+   --------------------------- */
+async function assignSpareLocation(spareId, locationId) {
+  await updateSpare(spareId, { locationId });
+}
+
+async function clearSpareLocation(spareId) {
+  await updateSpare(spareId, { locationId: null });
+}
+
+/* ============================
+   UI FOR LINKING
+   ============================ */
+
+/* Render linking options inside cards */
+async function renderLinkingForBike(div, bike) {
+  const spares = await getAllSpares();
+  const jobs = await getMyJobs();
+
+  const linkedSpares = bike.linkedSpares || [];
+  const linkedJobs = bike.linkedJobs || [];
+
+  div.innerHTML += `
+    <h3>Linked Spares</h3>
+    <ul>
+      ${linkedSpares.map(id => {
+        const s = spares.find(x => x.id === id);
+        return `<li>${s ? s.name : "Unknown"} 
+          <button class="pill pill-danger" onclick="unlinkSpareFromBike(${bike.id}, ${id}).then(renderBikes).then(renderDashboard)">Remove</button>
+        </li>`;
+      }).join("")}
+    </ul>
+
+    <select id="link-spare-${bike.id}">
+      <option value="">Link spare…</option>
+      ${spares.map(s => `<option value="${s.id}">${s.name}</option>`).join("")}
+    </select>
+    <button class="pill pill-accent" onclick="const sid=document.getElementById('link-spare-${bike.id}').value; if(sid) linkSpareToBike(${bike.id}, Number(sid)).then(renderBikes).then(renderDashboard)">Add Spare</button>
+
+    <h3>Linked Jobs</h3>
+    <ul>
+      ${jobs.filter(j => j.bikeId === bike.id).map(j => `
+        <li>${j.name}
+          <button class="pill pill-danger" onclick="unlinkJobFromBike(${j.id}).then(renderBikes).then(renderDashboard)">Remove</button>
+        </li>
+      `).join("")}
+    </ul>
+
+    <select id="link-job-${bike.id}">
+      <option value="">Link job…</option>
+      ${jobs.map(j => `<option value="${j.id}">${j.name}</option>`).join("")}
+    </select>
+    <button class="pill pill-accent" onclick="const jid=document.getElementById('link-job-${bike.id}').value; if(jid) linkJobToBike(Number(jid), ${bike.id}).then(renderBikes).then(renderDashboard)">Add Job</button>
+  `;
+}
+
+async function renderLinkingForSpare(div, spare) {
+  const locations = await getAllLocations();
+  const loc = locations.find(l => l.id === spare.locationId);
+
+  div.innerHTML += `
+    <h3>Location</h3>
+    <p>${loc ? loc.name : "None"}</p>
+
+    <select id="assign-location-${spare.id}">
+      <option value="">Assign location…</option>
+      ${locations.map(l => `<option value="${l.id}">${l.name}</option>`).join("")}
+    </select>
+
+    <button class="pill pill-accent" onclick="const lid=document.getElementById('assign-location-${spare.id}').value; if(lid) assignSpareLocation(${spare.id}, Number(lid)).then(renderSpares).then(renderDashboard)">Assign</button>
+
+    <button class="pill pill-danger" onclick="clearSpareLocation(${spare.id}).then(renderSpares).then(renderDashboard)">Clear</button>
+  `;
+}
+
+async function renderLinkingForJob(div, job) {
+  const tools = await getAllTools();
+  const bikes = await getMyBikes();
+
+  const linkedTools = job.linkedTools || [];
+  const bike = bikes.find(b => b.id === job.bikeId);
+
+  div.innerHTML += `
+    <h3>Linked Tools</h3>
+    <ul>
+      ${linkedTools.map(id => {
+        const t = tools.find(x => x.id === id);
+        return `<li>${t ? t.name : "Unknown"} 
+          <button class="pill pill-danger" onclick="unlinkToolFromJob(${job.id}, ${id}).then(renderJobs).then(renderDashboard)">Remove</button>
+        </li>`;
+      }).join("")}
+    </ul>
+
+    <select id="link-tool-${job.id}">
+      <option value="">Link tool…</option>
+      ${tools.map(t => `<option value="${t.id}">${t.name}</option>`).join("")}
+    </select>
+    <button class="pill pill-accent" onclick="const tid=document.getElementById('link-tool-${job.id}').value; if(tid) linkToolToJob(${job.id}, Number(tid)).then(renderJobs).then(renderDashboard)">Add Tool</button>
+
+    <h3>Assigned Bike</h3>
+    <p>${bike ? bike.name : "None"}</p>
+
+    <select id="assign-bike-${job.id}">
+      <option value="">Assign bike…</option>
+      ${bikes.map(b => `<option value="${b.id}">${b.name}</option>`).join("")}
+    </select>
+
+    <button class="pill pill-accent" onclick="const bid=document.getElementById('assign-bike-${job.id}').value; if(bid) linkJobToBike(${job.id}, Number(bid)).then(renderJobs).then(renderDashboard)">Assign</button>
+
+    <button class="pill pill-danger" onclick="unlinkJobFromBike(${job.id}).then(renderJobs).then(renderDashboard)">Clear</button>
+  `;
+}
+
+/* ============================
+   EXTEND RENDER FUNCTIONS
+   ============================ */
+
+const oldRenderBikes = renderBikes;
+renderBikes = async function() {
+  const bikes = await getMyBikes();
+  const container = document.getElementById("bikes-list");
+  container.innerHTML = "";
+
+  for (const bike of bikes) {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${bike.name}</div>
+        <div class="badge">${bike.type || ""}</div>
+      </div>
+      <p>${bike.notes || ""}</p>
+      <button class="pill pill-accent" onclick='openBikeModal(${JSON.stringify(bike)})'>Edit</button>
+      <button class="pill pill-danger" onclick='deleteBike(${bike.id}).then(renderBikes).then(renderDashboard)'>Delete</button>
+    `;
+    await renderLinkingForBike(div, bike);
+    container.appendChild(div);
+  }
+};
+
+const oldRenderSpares = renderSpares;
+renderSpares = async function() {
+  const spares = await getAllSpares();
+  const container = document.getElementById("spares-list");
+  container.innerHTML = "";
+
+  for (const spare of spares) {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${spare.name}</div>
+        <div class="badge">${spare.category || ""}</div>
+      </div>
+      <p>${spare.notes || ""}</p>
+      <button class="pill pill-accent" onclick='openSpareModal(${JSON.stringify(spare)})'>Edit</button>
+      <button class="pill pill-danger" onclick='deleteSpare(${spare.id}).then(renderSpares).then(renderDashboard)'>Delete</button>
+    `;
+    await renderLinkingForSpare(div, spare);
+    container.appendChild(div);
+  }
+};
+
+const oldRenderJobs = renderJobs;
+renderJobs = async function() {
+  const jobs = await getMyJobs();
+  const container = document.getElementById("jobs-list");
+  container.innerHTML = "";
+
+  for (const job of jobs) {
+    const div = document.createElement("div");
+    div.className = "card";
+    div.innerHTML = `
+      <div class="card-header">
+        <div class="card-title">${job.name}</div>
+      </div>
+      <p>${job.notes || ""}</p>
+      <button class="pill pill-accent" onclick='openJobModal(${JSON.stringify(job)})'>Edit</button>
+      <button class="pill pill-danger" onclick='deleteJob(${job.id}).then(renderJobs).then(renderDashboard)'>Delete</button>
+    `;
+    await renderLinkingForJob(div, job);
+    container.appendChild(div);
+  }
+};
+</script>
+<script>
+/* ============================
+   SECTION 6 — EXPORT / IMPORT
+   ============================ */
+
+/* ---------------------------
+   EXPORT DATABASE
+   --------------------------- */
+async function exportDatabase() {
+  const stores = [
+    "users",
+    "bikes",
+    "jobs",
+    "spares",
+    "tools",
+    "locations",
+    "jobTemplates"
+  ];
+
+  const exportObj = {};
+
+  for (const storeName of stores) {
+    const tx = db.transaction(storeName, "readonly");
+    const store = tx.objectStore(storeName);
+
+    exportObj[storeName] = await new Promise((resolve, reject) => {
+      const req = store.getAll();
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  const json = JSON.stringify(exportObj, null, 2);
+
+  const blob = new Blob([json], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "bike-workshop-export.json";
+  a.click();
+
+  URL.revokeObjectURL(url);
+}
+
+/* ---------------------------
+   IMPORT DATABASE
+   --------------------------- */
+async function importDatabase(jsonData) {
+  let data;
+  try {
+    data = JSON.parse(jsonData);
+  } catch (err) {
+    alert("Invalid JSON file");
+    return;
+  }
+
+  const stores = [
+    "users",
+    "bikes",
+    "jobs",
+    "spares",
+    "tools",
+    "locations",
+    "jobTemplates"
+  ];
+
+  // Clear each store before import
+  for (const storeName of stores) {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+    await new Promise((resolve, reject) => {
+      const req = store.clear();
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  // Insert imported data
+  for (const storeName of stores) {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+
+    for (const item of data[storeName] || []) {
+      await new Promise((resolve, reject) => {
+        const req = store.add(item);
+        req.onsuccess = () => resolve();
+        req.onerror = () => reject(req.error);
       });
     }
+  }
 
-    navItems.forEach(item => {
-      item.addEventListener("click", () => {
-        const page = item.dataset.page;
-        showPage(page);
-      });
+  alert("Import complete!");
+
+  // Re-render everything
+  renderDashboard();
+  renderBikes();
+  renderSpares();
+  renderTools();
+  renderJobs();
+  renderLocations();
+}
+
+/* ---------------------------
+   CLEAR DATABASE (ADMIN ONLY)
+   --------------------------- */
+async function clearDatabase() {
+  if (!currentUser || currentUser.role !== "administrator") {
+    alert("Admin only");
+    return;
+  }
+
+  const stores = [
+    "users",
+    "bikes",
+    "jobs",
+    "spares",
+    "tools",
+    "locations",
+    "jobTemplates"
+  ];
+
+  for (const storeName of stores) {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+    await new Promise((resolve, reject) => {
+      const req = store.clear();
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
     });
-  </script>
-</body>
-</html>
+  }
+
+  alert("Database cleared. Reloading…");
+  location.reload();
+}
+
+/* ---------------------------
+   UI HOOKS
+   --------------------------- */
+document.getElementById("export-db-btn").onclick = () => {
+  if (currentUser.role !== "administrator") {
+    alert("Admin only");
+    return;
+  }
+  exportDatabase();
+};
+
+document.getElementById("clear-db-btn").onclick = () => {
+  clearDatabase();
+};
+
+/* Import button (admin page) */
+const importInput = document.createElement("input");
+importInput.type = "file";
+importInput.accept = ".json";
+importInput.style.display = "none";
+
+importInput.onchange = async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const text = await file.text();
+  importDatabase(text);
+};
+
+const importBtn = document.createElement("button");
+importBtn.className = "pill pill-accent";
+importBtn.textContent = "Import Database";
+importBtn.onclick = () => {
+  if (currentUser.role !== "administrator") {
+    alert("Admin only");
+    return;
+  }
+  importInput.click();
+};
+
+document.getElementById("page-admin").appendChild(importBtn);
+document.getElementById("page-admin").appendChild(importInput);
+</script>
+<!-- ============================
+     SECTION 7 — FINAL ASSEMBLY
+     ============================ -->
+
+<script>
+/*
+  SECTION 7 — FINAL ASSEMBLY & DEPLOYMENT GUIDE
+  ----------------------------------------------
+
+  Your Digital Bike Workshop is now fully functional.
+
+  This section explains how to assemble the final file,
+  deploy it to GitHub Pages, and verify everything works.
+
+  ----------------------------------------------
+  1. ASSEMBLE THE FINAL SINGLE-FILE APP
+  ----------------------------------------------
+
+  Your final file should contain Sections 1–6 in this order:
+
+    SECTION 1 — <head>, CSS, Login Page
+    SECTION 2 — IndexedDB Hybrid Data Helpers
+    SECTION 3 — Workshop UI Shell
+    SECTION 4 — CRUD Modals + UI Hooks
+    SECTION 5 — Linking Logic
+    SECTION 6 — Export / Import
+
+  Make sure:
+    - All <script> blocks remain in order
+    - All <style> blocks remain in order
+    - No duplicate <html>, <head>, or <body> tags
+    - The login screen appears before the workshop UI
+
+  ----------------------------------------------
+  2. DEPLOY TO GITHUB PAGES
+  ----------------------------------------------
+
+  Steps:
+    1. Go to your GitHub repo:
+         https://github.com/otissnr/Bikeworks
+
+    2. Replace your current index.html with:
+         bikeworkshop.html
+
+    3. Commit and push.
+
+    4. Ensure GitHub Pages is enabled:
+         Settings → Pages → Deploy from main branch
+
+    5. Your app will be live at:
+         https://otissnr.github.io/Bikeworks
+
+  ----------------------------------------------
+  3. VERIFY LOGIN SYSTEM
+  ----------------------------------------------
+
+  Test the built-in admin account:
+
+    Username: admin
+    Password: workshop
+
+  Then:
+    - Create a new user
+    - Log out
+    - Log in as the new user
+    - Confirm bikes/jobs are per-user
+    - Confirm spares/tools/locations are shared
+
+  ----------------------------------------------
+  4. VERIFY DATABASE FUNCTIONALITY
+  ----------------------------------------------
+
+  Test each page:
+
+    Bikes:
+      - Add a bike
+      - Edit it
+      - Delete it
+
+    Spares:
+      - Add a spare
+      - Assign a location
+      - Link to a bike
+
+    Tools:
+      - Add a tool
+      - Link to a job
+
+    Jobs:
+      - Add a job
+      - Assign to a bike
+      - Link tools
+
+    Locations:
+      - Add a location
+      - Assign spares
+
+  ----------------------------------------------
+  5. VERIFY LINKING LOGIC
+  ----------------------------------------------
+
+  Bikes ↔ Spares:
+    - Link spare to bike
+    - Remove link
+
+  Jobs ↔ Tools:
+    - Link tool to job
+    - Remove link
+
+  Jobs ↔ Bikes:
+    - Assign job to bike
+    - Clear assignment
+
+  Spares ↔ Locations:
+    - Assign spare to location
+    - Clear location
+
+  ----------------------------------------------
+  6. VERIFY EXPORT / IMPORT
+  ----------------------------------------------
+
+  As admin:
+    - Export database (JSON file)
+    - Clear database
+    - Import JSON file
+    - Confirm all data restored
+
+  ----------------------------------------------
+  7. OPTIONAL: CUSTOMIZE UI
+  ----------------------------------------------
+
+  You can safely modify:
+    - Colors (CSS variables in :root)
+    - Logo (replace logo.png)
+    - Sidebar labels
+    - Page titles
+    - Design Document content
+
+  ----------------------------------------------
+  8. OPTIONAL: ADD FEATURES LATER
+  ----------------------------------------------
+
+  The architecture supports:
+    - Job templates
+    - Spare compatibility rules
+    - Tool calibration logs
+    - Bike service history
+    - Multi-user permissions
+    - Dark/light theme toggle
+    - Sync via manual JSON export/import
+
+  ----------------------------------------------
+  END OF SECTION 7
+  ----------------------------------------------
+*/
+</script>
