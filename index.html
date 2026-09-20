@@ -302,7 +302,9 @@ openDatabase().then(() => {
 async function addUser(user) {
   return dbAdd("users", { ...user, createdAt: Date.now() });
 }
-
+async function addUser(user) {
+  return dbAdd("users", { ...user, createdAt: Date.now() });
+}
 /* BIKES (PER-USER) */
 async function addBike(bike) {
   return dbAdd("bikes", {
