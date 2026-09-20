@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Digital Bike Workshop</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Favicon: point this to your logo file in the same folder -->
+  <link rel="icon" type="image/png" href="logo.png" />
+
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-alt: #111827;
+      --panel: #1f2937;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.15);
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #374151;
+      --danger: #ef4444;
+      --warning: #f97316;
+      --ok: #22c55e;
+      --font: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+              "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font);
+      background: radial-gradient(circle at top left, #1f2937 0, #020617 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      width: 100%;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(to bottom, #020617, #030712);
+      border-right: 1px solid var(--border);
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .sidebar-title {
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+    }
+
+    .nav-section-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--muted);
+      margin: 12px 0 4px;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, transform 0.08s;
+      font-size: 0.9rem;
+    }
+
+    .nav-item span.icon {
+      font-size: 1rem;
+      width: 20px;
+      text-align: center;
+    }
+
+    .nav-item.active {
+      background: var(--accent-soft);
+      color: var(--text);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+
+    .nav-item:hover {
+      background: rgba(148, 163, 184, 0.12);
+      color: var(--text);
+      transform: translateX(1px);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      font-size: 0.75rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+
+    /* Main */
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(to right, #020617, #0b1120);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-circle {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .logo-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .header-title {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-title-main {
+      font-size: 1.1rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .header-title-sub {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .pill {
+      padding: 4px 8px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.7);
+    }
+
+    .pill-accent {
+      border-color: rgba(34, 197, 94, 0.5);
+      color: var(--accent);
+    }
+
+    /* Content */
+    .content {
+      flex: 1;
+      padding: 16px 18px 12px;
+      background: radial-gradient(circle at top, #020617 0, #020617 40%, #000000 100%);
+      overflow-y: auto;
+    }
+
+    .page {
+      display: none;
+      animation: fadeIn 0.18s ease-out;
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .page-title {
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .page-subtitle {
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .page-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.6);
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-title span.icon {
+      font-size: 1rem;
+    }
+
+    .card-subtitle {
+      font-size: 0.75rem;
+      color: var(--muted);
+    }
+
+    .badge {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+
+    .badge-ok {
+      border-color: rgba(34, 197, 94, 0.5);
+      color: var(--ok);
+    }
+
+    .badge-warn {
+      border-color: rgba(249, 115, 22, 0.5);
+      color: var(--warning);
+    }
+
+    .badge-danger {
+      border-color: rgba(239, 68, 68, 0.5);
+      color: var(--danger);
+    }
+
+    .list {
+      list-style: none;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .list li {
+      padding: 4px 0;
+      border-bottom: 1px dashed rgba(55, 65, 81, 0.6);
+    }
+
+    .list li:last-child {
+      border-bottom: none;
+    }
+
+    .list-label {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .tag {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--muted);
+    }
+
+    .tag-accent {
+      border-color: rgba(34, 197, 94, 0.6);
+      color: var(--accent);
+    }
+
+    /* Design Document page */
+    .design-doc {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .design-doc h1 {
+      font-size: 1.3rem;
+      margin-bottom: 6px;
+    }
+
+    .design-doc h2 {
+      font-size: 1rem;
+      margin-top: 14px;
+      margin-bottom: 4px;
+    }
+
+    .design-doc h3 {
+      font-size: 0.9rem;
+      margin-top: 10px;
+      margin-bottom: 3px;
+    }
+
+    .design-doc p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+      line-height: 1.5;
+    }
+
+    .design-doc ul {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-left: 16px;
+      margin-bottom: 6px;
+    }
+
+    .design-doc li {
+      margin-bottom: 3px;
+    }
+
+    .design-doc-callout {
+      border-left: 3px solid var(--accent);
+      padding-left: 10px;
+      margin: 10px 0;
+      font-size: 0.8rem;
+      color: var(--text);
+    }
+
+    /* Footer */
+    .footer {
+      padding: 8px 18px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      background: #020617;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .footer span {
+      white-space: nowrap;
+    }
+
+    @media (max-width: 900px) {
+      .app-shell {
+        grid-template-columns: 220px minmax(0, 1fr);
+      }
+      .page-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 720px) {
+      body {
+        flex-direction: column;
+      }
+      .app-shell {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .sidebar {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 10px;
+      }
+      .nav-section-label {
+        display: none;
+      }
+      .nav-list {
+        flex-direction: row;
+        flex-wrap: nowrap;
+      }
+      .nav-item {
+        white-space: nowrap;
+      }
+      .header {
+        padding: 10px 12px;
+      }
+      .content {
+        padding: 12px;
+      }
+      .footer {
+        padding: 8px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div>
+        <div class="sidebar-title">Digital Bike Workshop</div>
+        <div style="font-size:0.8rem;color:var(--muted);margin-top:4px;">
+          Relentless Attacks · Jones Street Cycles
+        </div>
+      </div>
+
+      <div>
+        <div class="nav-section-label">Workshop</div>
+        <ul class="nav-list">
+          <li class="nav-item active" data-page="dashboard">
+            <span class="icon">🏁</span>
+            <span>Dashboard</span>
+          </li>
+          <li class="nav-item" data-page="bikes">
+            <span class="icon">🚲</span>
+            <span>Bikes</span>
+          </li>
+          <li class="nav-item" data-page="spares">
+            <span class="icon">🧩</span>
+            <span>Spares & Components</span>
+          </li>
+          <li class="nav-item" data-page="tools">
+            <span class="icon">🛠️</span>
+            <span>Tools & Jigs</span>
+          </li>
+          <li class="nav-item" data-page="repairs">
+            <span class="icon">📋</span>
+            <span>Repairs & Jobs</span>
+          </li>
+        </ul>
+      </div>
+
+      <div>
+        <div class="nav-section-label">Community & Admin</div>
+        <ul class="nav-list">
+          <li class="nav-item" data-page="community">
+            <span class="icon">👥</span>
+            <span>Community & Sharing</span>
+          </li>
+          <li class="nav-item" data-page="admin">
+            <span class="icon">⚙️</span>
+            <span>Admin & Data</span>
+          </li>
+          <li class="nav-item" data-page="design-doc">
+            <span class="icon">📘</span>
+            <span>Design Document</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-footer">
+        <div>Digital Bike Workshop · Local-first concept</div>
+        <div style="margin-top:4px;">Relentless Attacks · Jones Street Cycles</div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div class="main">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <div class="logo-circle">
+            <!-- Point src to your logo file (white background, circle feel) -->
+            <img src="logo.png" alt="Relentless Attacks / Jones Street Cycles logo" />
+          </div>
+          <div class="header-title">
+            <div class="header-title-main">Digital Bike Workshop</div>
+            <div class="header-title-sub">
+              Cycling spares, jobs, tools & community · Local-first
+            </div>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="pill pill-accent">Workshop Mode: Demo</div>
+          <div class="pill">Data: Local-first concept</div>
+        </div>
+      </header>
+
+      <!-- Content -->
+      <main class="content">
+        <!-- Dashboard -->
+        <section class="page active" id="page-dashboard">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Workshop Overview</div>
+              <div class="page-subtitle">
+                Bikes, spares, tools and jobs at a glance.
+              </div>
+            </div>
+            <div class="badge badge-ok">Concept Demo</div>
+          </div>
+
+          <div class="page-grid">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <span class="icon">🚲</span>
+                  <span>Bikes & Builds</span>
+                </div>
+                <div class="badge badge-ok">Ready</div>
+              </div>
+              <div class="card-subtitle">
+                Core bikes, frames and build states.
+              </div>
+              <ul class="list" id="dashboard-bikes-list">
+                <li>
+                  <span class="list-label">Relentless Attacks · Gravel build</span><br />
+                  <span>Frameset, drivetrain, wheels, cockpit, bags · build state tracked.</span>
+                </li>
+                <li>
+                  <span class="list-label">Jones Street Cycles · Commuter</span><br />
+                  <span>Everyday bike with spares mapped to jobs.</span>
+                </li>
+                <li>
+                  <span class="list-label">Workshop test rigs</span><br />
+                  <span>Brake test rig, wheel truing, drivetrain test stand.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <span class="icon">🧩</span>
+                  <span>Spares & Components</span>
+                </div>
+                <div class="badge badge-warn">Concept</div>
+              </div>
+              <div class="card-subtitle">
+                Spares mapped to bikes, jobs and locations.
+              </div>
+              <ul class="list" id="dashboard-spares-list">
+                <li>
+                  <span class="list-label">Tyres & tubes</span><br />
+                  <span>Gravel, road, commuter · sizes, valve types, locations.</span>
+                </li>
+                <li>
+                  <span class="list-label">Drivetrain</span><br />
+                  <span>Chains, cassettes, chainrings · wear state and job links.</span>
+                </li>
+                <li>
+                  <span class="list-label">Brakes & controls</span><br />
+                  <span>Pads, rotors, cables, levers · compatibility tracked.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="page-grid" style="margin-top:12px;">
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <span class="icon">🛠️</span>
+                  <span>Tools & Jigs</span>
+                </div>
+                <div class="badge badge-ok">Workshop</div>
+              </div>
+              <div class="card-subtitle">
+                Physical tools, 3D-printed jigs and fixtures.
+              </div>
+              <ul class="list" id="dashboard-tools-list">
+                <li>
+                  <span class="list-label">Core tools</span><br />
+                  <span>Hex keys, torque wrench, cable cutters, chain tools.</span>
+                </li>
+                <li>
+                  <span class="list-label">3D-printed jigs</span><br />
+                  <span>Brake pad alignment, rotor spacers, wheel dish gauges.</span>
+                </li>
+                <li>
+                  <span class="list-label">Workholding</span><br />
+                  <span>Bike stands, frame supports, bench fixtures.</span>
+                </li>
+              </ul>
+            </div>
+
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <span class="icon">📋</span>
+                  <span>Repairs & Jobs</span>
+                </div>
+                <div class="badge badge-warn">Concept</div>
+              </div>
+              <div class="card-subtitle">
+                Jobs linked to bikes, spares and tools.
+              </div>
+              <ul class="list" id="dashboard-jobs-list">
+                <li>
+                  <span class="list-label">Brake service</span><br />
+                  <span>Pads, rotors, fluid/cables · tools and jigs mapped.</span>
+                </li>
+                <li>
+                  <span class="list-label">Drivetrain refresh</span><br />
+                  <span>Chain, cassette, chainring · wear tracking and spares mapping.</span>
+                </li>
+                <li>
+                  <span class="list-label">Wheel work</span><br />
+                  <span>Truing, spoke replacement, tyre swap · rig and tools linked.</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- Bikes -->
+        <section class="page" id="page-bikes">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Bikes & Frames</div>
+              <div class="page-subtitle">
+                Core bikes, framesets and build states.
+              </div>
+            </div>
+            <div class="badge badge-ok">Concept structure</div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="icon">🚲</span>
+                <span>Example bikes</span>
+              </div>
+              <div class="badge">Demo only</div>
+            </div>
+            <div class="card-subtitle">
+              This is a concept layout for how bikes could be represented.
+            </div>
+            <ul class="list">
+              <li>
+                <span class="list-label">Relentless Attacks · Gravel bike</span><br />
+                <span>Frameset, fork, wheels, drivetrain, cockpit, bags.</span>
+                <div class="tag-row">
+                  <span class="tag tag-accent">Gravel</span>
+                  <span class="tag">1x drivetrain</span>
+                  <span class="tag">Tubeless</span>
+                  <span class="tag">Bikepacking-ready</span>
+                </div>
+              </li>
+              <li>
+                <span class="list-label">Jones Street Cycles · Commuter</span><br />
+                <span>City bike with racks, lights, fenders and robust spares mapping.</span>
+                <div class="tag-row">
+                  <span class="tag">Commuter</span>
+                  <span class="tag">Dynamo lights</span>
+                  <span class="tag">Rack & panniers</span>
+                </div>
+              </li>
+              <li>
+                <span class="list-label">Workshop test rigs</span><br />
+                <span>Dedicated frames for brake testing, drivetrain experiments and wheel work.</span>
+                <div class="tag-row">
+                  <span class="tag">Test rig</span>
+                  <span class="tag">Brake lab</span>
+                  <span class="tag">Wheel lab</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Spares -->
+        <section class="page" id="page-spares">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Spares & Components</div>
+              <div class="page-subtitle">
+                Tyres, tubes, drivetrain, brakes, controls and more.
+              </div>
+            </div>
+            <div class="badge badge-warn">Concept structure</div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="icon">🧩</span>
+                <span>Example spares mapping</span>
+              </div>
+              <div class="badge">Demo only</div>
+            </div>
+            <div class="card-subtitle">
+              Spares mapped to bikes, jobs, locations and compatibility.
+            </div>
+            <ul class="list">
+              <li>
+                <span class="list-label">Tyres & tubes</span><br />
+                <span>Gravel, road, commuter · sizes, valve types, rim compatibility.</span>
+                <div class="tag-row">
+                  <span class="tag">700c gravel</span>
+                  <span class="tag">650b</span>
+                  <span class="tag">Presta</span>
+                  <span class="tag">Schrader</span>
+                </div>
+              </li>
+              <li>
+                <span class="list-label">Drivetrain</span><br />
+                <span>Chains, cassettes, chainrings · speed, brand, wear state.</span>
+                <div class="tag-row">
+                  <span class="tag">11-speed</span>
+                  <span class="tag">12-speed</span>
+                  <span class="tag">Gravel-specific</span>
+                </div>
+              </li>
+              <li>
+                <span class="list-label">Brakes & controls</span><br />
+                <span>Pads, rotors, cables, levers · mechanical vs hydraulic, rotor sizes.</span>
+                <div class="tag-row">
+                  <span class="tag">160mm rotors</span>
+                  <span class="tag">180mm rotors</span>
+                  <span class="tag">Flat-mount</span>
+                  <span class="tag">Post-mount</span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Tools -->
+        <section class="page" id="page-tools">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Tools & Jigs</div>
+              <div class="page-subtitle">
+                Physical tools, 3D-printed jigs and fixtures.
+              </div>
+            </div>
+            <div class="badge badge-ok">Workshop concept</div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="icon">🛠️</span>
+                <span>Example tools & jigs</span>
+              </div>
+              <div class="badge">Demo only</div>
+            </div>
+            <div class="card-subtitle">
+              Tools mapped to jobs, bikes and spares.
+            </div>
+            <ul class="list">
+              <li>
+                <span class="list-label">Core hand tools</span><br />
+                <span>Hex keys, torque wrench, cable cutters, chain tools.</span>
+              </li>
+              <li>
+                <span class="list-label">3D-printed jigs</span><br />
+                <span>Brake pad alignment, rotor spacers, wheel dish gauges.</span>
+              </li>
+              <li>
+                <span class="list-label">Workholding & stands</span><br />
+                <span>Bike stands, frame supports, bench fixtures.</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Repairs -->
+        <section class="page" id="page-repairs">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Repairs & Jobs</div>
+              <div class="page-subtitle">
+                Jobs linked to bikes, spares and tools.
+              </div>
+            </div>
+            <div class="badge badge-warn">Concept structure</div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="icon">📋</span>
+                <span>Example jobs</span>
+              </div>
+              <div class="badge">Demo only</div>
+            </div>
+            <div class="card-subtitle">
+              Jobs as structured tasks with required spares and tools.
+            </div>
+            <ul class="list">
+              <li>
+                <span class="list-label">Brake service</span><br />
+                <span>Pads, rotors, fluid/cables · tools and jigs mapped.</span>
+              </li>
+              <li>
+                <span class="list-label">Drivetrain refresh</span><br />
+                <span>Chain, cassette, chainring · wear tracking and spares mapping.</span>
+              </li>
+              <li>
+                <span class="list-label">Wheel work</span><br />
+                <span>Truing, spoke replacement, tyre swap · rig and tools linked.</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Community -->
+        <section class="page" id="page-community">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Community & Sharing</div>
+              <div class="page-subtitle">
+                Sharing builds, spares lists and job templates.
+              </div>
+            </div>
+            <div class="badge">Concept</div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="icon">👥</span>
+                <span>Concept: Sharing & collaboration</span>
+              </div>
+              <div class="badge">Idea space</div>
+            </div>
+            <div class="card-subtitle">
+              This page sketches how a community layer could work.
+            </div>
+            <p style="font-size:0.8rem;color:var(--muted);margin-top:6px;">
+              The Digital Bike Workshop could eventually support:
+            </p>
+            <ul class="list">
+              <li>
+                <span class="list-label">Shared build templates</span><br />
+                <span>Gravel, commuter, touring, cargo · reusable build patterns.</span>
+              </li>
+              <li>
+                <span class="list-label">Shared job templates</span><br />
+                <span>Brake service, drivetrain refresh, wheel work · standardised steps.</span>
+              </li>
+              <li>
+                <span class="list-label">Spares lists</span><br />
+                <span>Community-curated lists for specific bikes and use cases.</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Admin -->
+        <section class="page" id="page-admin">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Admin & Data</div>
+              <div class="page-subtitle">
+                Local-first data, backups and structure.
+              </div>
+            </div>
+            <div class="badge">Concept</div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="icon">⚙️</span>
+                <span>Concept: Data model</span>
+              </div>
+              <div class="badge">Idea space</div>
+            </div>
+            <div class="card-subtitle">
+              High-level sketch of how data could be structured.
+            </div>
+            <ul class="list">
+              <li>
+                <span class="list-label">Local-first</span><br />
+                <span>Data stored locally first, with optional sync/export.</span>
+              </li>
+              <li>
+                <span class="list-label">Entities</span><br />
+                <span>Bikes, spares, tools, jobs, locations, people.</span>
+              </li>
+              <li>
+                <span class="list-label">Relationships</span><br />
+                <span>Jobs link bikes, spares and tools · spares map to locations.</span>
+              </li>
+            </ul>
+          </div>
+        </section>
+
+        <!-- Design Document -->
+        <section class="page" id="page-design-doc">
+          <div class="page-header">
+            <div>
+              <div class="page-title">Design Document</div>
+              <div class="page-subtitle">
+                Cycling Spares App concept · Digital Bike Workshop.
+              </div>
+            </div>
+            <div class="badge badge-ok">Concept narrative</div>
+          </div>
+
+          <div class="card design-doc">
+            <div class="card-header">
+              <div class="card-title">
+                <span class="icon">📘</span>
+                <span>Cycling Spares App · Digital Bike Workshop</span>
+              </div>
+              <div class="badge">Concept document</div>
+            </div>
+
+            <div class="design-doc-callout">
+              This page captures the concept narrative for the Cycling Spares App /
+              Digital Bike Workshop: a local-first, practical tool for managing bikes,
+              spares, jobs and tools in a real workshop.
+            </div>
+
+            <!-- Replace this block with your full concept text if you want to expand it further -->
+            <h1>Vision</h1>
+            <p>
+              The Cycling Spares App (Digital Bike Workshop) is a concept for a
+              local-first, practical tool that helps a rider or small workshop keep
+              track of bikes, spares, tools and jobs in a way that matches how work
+              actually happens on the bench.
+            </p>
+
+            <h2>Core ideas</h2>
+            <ul>
+              <li>
+                <strong>Local-first:</strong> Data lives with the workshop first,
+                with optional export or sync.
+              </li>
+              <li>
+                <strong>Bike-centric:</strong> Bikes and frames are the anchor
+                objects; spares, tools and jobs orbit them.
+              </li>
+              <li>
+                <strong>Job-focused:</strong> Jobs link bikes, spares and tools,
+                making it clear what is needed for each task.
+              </li>
+              <li>
+                <strong>Practical mapping:</strong> Spares are mapped to locations
+                (bins, boxes, shelves) and to compatibility (which bikes they fit).
+              </li>
+            </ul>
+
+            <h2>Entities</h2>
+            <h3>Bikes & frames</h3>
+            <p>
+              Bikes represent complete or in-progress builds. Framesets and test rigs
+              are treated as first-class objects, allowing the workshop to track
+              dedicated rigs for brake testing, drivetrain experiments and wheel work.
+            </p>
+
+            <h3>Spares & components</h3>
+            <p>
+              Spares include tyres, tubes, drivetrain parts, brakes, controls and
+              small hardware. Each spare can be mapped to:
+            </p>
+            <ul>
+              <li>One or more bikes (compatibility)</li>
+              <li>One or more jobs (where it is used)</li>
+              <li>One or more locations (where it physically lives)</li>
+            </ul>
+
+            <h3>Tools & jigs</h3>
+            <p>
+              Tools cover core hand tools, torque tools, cable tools and chain tools.
+              Jigs include 3D-printed fixtures, brake pad alignment tools, rotor
+              spacers and wheel dish gauges. Tools and jigs are linked to jobs so
+              each job has a clear tool list.
+            </p>
+
+            <h3>Jobs & tasks</h3>
+            <p>
+              Jobs are structured tasks such as brake service, drivetrain refresh or
+              wheel work. Each job links:
+            </p>
+            <ul>
+              <li>One or more bikes</li>
+              <li>Required spares</li>
+              <li>Required tools and jigs</li>
+              <li>Optional notes and steps</li>
+            </ul>
+
+            <h2>Workshop flow</h2>
+            <p>
+              The app is designed to mirror how a real workshop operates:
+            </p>
+            <ul>
+              <li>Identify a job on a bike.</li>
+              <li>Check spares availability and compatibility.</li>
+              <li>Check tools and jigs required.</li>
+              <li>Execute the job and update state (wear, usage, notes).</li>
+            </ul>
+
+            <h2>Local-first data</h2>
+            <p>
+              The concept emphasises local-first data: the workshop owns its data,
+              with optional export or sync. This keeps the tool lightweight, resilient
+              and focused on practical use rather than cloud complexity.
+            </p>
+
+            <h2>Future directions</h2>
+            <ul>
+              <li>Shared build templates for gravel, commuter, touring and cargo bikes.</li>
+              <li>Shared job templates for common tasks.</li>
+              <li>Community-curated spares lists for specific bikes and use cases.</li>
+            </ul>
+
+            <p>
+              This Design Document page is intentionally concise. It can be expanded
+              into a full specification, including data models, UI flows and
+              integration points, but for now it serves as a readable, embedded
+              concept inside the Digital Bike Workshop app.
+            </p>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer class="footer">
+        <span>Version 1.0 — September 2026</span>
+        <span>© Adam Otis Farrugia</span>
+      </footer>
+    </div>
+  </div>
+
+  <script>
+    // Simple page navigation
+    const navItems = document.querySelectorAll(".nav-item");
+    const pages = document.querySelectorAll(".page");
+
+    function showPage(pageId) {
+      pages.forEach(p => {
+        p.classList.toggle("active", p.id === "page-" + pageId);
+      });
+      navItems.forEach(item => {
+        item.classList.toggle("active", item.dataset.page === pageId);
+      });
+    }
+
+    navItems.forEach(item => {
+      item.addEventListener("click", () => {
+        const page = item.dataset.page;
+        showPage(page);
+      });
+    });
+  </script>
+</body>
+</html>
