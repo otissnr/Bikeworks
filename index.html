@@ -106,10 +106,11 @@
     <input id="login-username" placeholder="Username" />
     <input id="login-password" type="password" placeholder="Password" />
     <button id="login-btn">Login</button>
+    <button id="create-account-btn" style="margin-top:10px;">Create Account</button>
 
-    <div class="login-note">
-      Admin: <strong>admin</strong> / <strong>workshop</strong>
-    </div>
+    <!-- <div class="login-note">
+       Admin: <strong>admin</strong> / <strong>workshop</strong>
+     </div> -->
   </div>
 </div>
 
@@ -244,6 +245,42 @@ document.getElementById("login-btn").onclick = async () => {
   localStorage.setItem("bikeWorkshopSession", JSON.stringify(user));
   document.getElementById("login-screen").style.display = "none";
   showWorkshopUI();
+};
+  
+function openCreateAccountModal() {
+  document.getElementById("modal-create-account").style.display = "flex";
+}
+
+function closeCreateAccountModal() {
+  document.getElementById("modal-create-account").style.display = "none";
+}
+
+document.getElementById("create-account-btn").onclick = () => openCreateAccountModal();
+
+document.getElementById("create-account-save-btn").onclick = async () => {
+  const username = document.getElementById("new-username").value.trim();
+  const password = document.getElementById("new-password").value.trim();
+
+  if (!username || !password) {
+    alert("Username and password required");
+    return;
+  }
+
+  const users = await dbGetAll("users");
+  if (users.some(u => u.username === username)) {
+    alert("Username already exists");
+    return;
+  }
+
+  await addUser({
+    username,
+    password,
+    role: "user",
+    createdAt: Date.now()
+  });
+
+  alert("Account created. You can now log in.");
+  closeCreateAccountModal();
 };
 
 openDatabase().then(() => {
@@ -932,6 +969,16 @@ document.getElementById("logout-btn").onclick = () => {
     <textarea id="location-notes" placeholder="Notes"></textarea>
     <button id="location-save-btn">Save</button>
     <div class="modal-cancel" onclick="closeLocationModal()">Cancel</div>
+  </div>
+</div>
+
+<div class="modal" id="modal-create-account">
+  <div class="modal-box">
+    <h2>Create Account</h2>
+    <input id="new-username" placeholder="New username" />
+    <input id="new-password" type="password" placeholder="New password" />
+    <button id="create-account-save-btn">Create Account</button>
+    <div class="modal-cancel" onclick="closeCreateAccountModal()">Cancel</div>
   </div>
 </div>
 
