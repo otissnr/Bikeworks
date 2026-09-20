@@ -224,63 +224,62 @@ async function ensureAdminUser() {
 
 async function login(username, password) {
   const users = await dbGetAll("users");
-  const user = users.find(u => u.username === username && u.password === password);
-  if (!user) return null;
-  return user;
+  return users.find(u => u.username === username && u.password === password) || null;
 }
 
-document.getElementById("login-btn").onclick = async () => {
-  const username = document.getElementById("login-username").value.trim();
-  const password = document.getElementById("login-password").value.trim();
-  if (!username || !password) {
-    alert("Username and password required");
-    return;
-  }
-  const user = await login(username, password);
-  if (!user) {
-    alert("Invalid credentials");
-    return;
-  }
-  currentUser = user;
-  localStorage.setItem("bikeWorkshopSession", JSON.stringify(user));
-  document.getElementById("login-screen").style.display = "none";
-  showWorkshopUI();
-};
-  
-function openCreateAccountModal() {
-  document.getElementById("modal-create-account").style.display = "flex";
-}
+window.onload = () => {
 
-function closeCreateAccountModal() {
-  document.getElementById("modal-create-account").style.display = "none";
-}
+  document.getElementById("login-btn").onclick = async () => {
+    const username = document.getElementById("login-username").value.trim();
+    const password = document.getElementById("login-password").value.trim();
 
-document.getElementById("create-account-btn").onclick = () => openCreateAccountModal();
+    if (!username || !password) {
+      alert("Username and password required");
+      return;
+    }
 
-document.getElementById("create-account-save-btn").onclick = async () => {
-  const username = document.getElementById("new-username").value.trim();
-  const password = document.getElementById("new-password").value.trim();
+    const user = await login(username, password);
+    if (!user) {
+      alert("Invalid credentials");
+      return;
+    }
 
-  if (!username || !password) {
-    alert("Username and password required");
-    return;
-  }
+    currentUser = user;
+    localStorage.setItem("bikeWorkshopSession", JSON.stringify(user));
+    document.getElementById("login-screen").style.display = "none";
+    showWorkshopUI();
+  };
 
-  const users = await dbGetAll("users");
-  if (users.some(u => u.username === username)) {
-    alert("Username already exists");
-    return;
-  }
+  document.getElementById("create-account-btn").onclick = () => {
+    document.getElementById("modal-create-account").style.display = "flex";
+  };
 
-  await addUser({
-    username,
-    password,
-    role: "user",
-    createdAt: Date.now()
-  });
+  document.getElementById("create-account-save-btn").onclick = async () => {
+    const username = document.getElementById("new-username").value.trim();
+    const password = document.getElementById("new-password").value.trim();
 
-  alert("Account created. You can now log in.");
-  closeCreateAccountModal();
+    if (!username || !password) {
+      alert("Username and password required");
+      return;
+    }
+
+    const users = await dbGetAll("users");
+    if (users.some(u => u.username === username)) {
+      alert("Username already exists");
+      return;
+    }
+
+    await addUser({
+      username,
+      password,
+      role: "user",
+      createdAt: Date.now()
+    });
+
+    alert("Account created. You can now log in.");
+    document.getElementById("modal-create-account").style.display = "none";
+  };
+
 };
 
 openDatabase().then(() => {
