@@ -5,7 +5,6 @@
   <title>Digital Bike Workshop</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="logo.png" />
 
   <style>
@@ -318,7 +317,7 @@ document.getElementById("login-btn").onclick = async () => {
   try {
     await login(u, p);
     document.getElementById("login-screen").style.display = "none";
-    // Workshop UI will appear once SECTION 3 is added
+    showWorkshopUI();
   } catch (err) {
     alert("Invalid username or password");
   }
@@ -353,35 +352,82 @@ document.getElementById("create-account-btn").onclick = async () => {
 /* Initialize DB + seed admin */
 openDatabase().then(seedAdminIfNeeded);
 </script>
-<script>
-/* ============================
-   SECTION 2 — DATA HELPERS
-   Hybrid: shared spares/tools,
-   per-user bikes/jobs
-   ============================ */
+<!-- ============================
+     PART 2 — INDEXEDDB HELPERS
+     ============================ -->
 
-/* ---- Bikes (per-user) ---- */
-async function addBike(bike) {
-  if (!currentUser) throw new Error("Not logged in");
-  const tx = db.transaction("bikes", "readwrite");
-  const store = tx.objectStore("bikes");
+<script>
+/* -----------------------------------------
+   GENERIC DB GET/PUT/DELETE HELPERS
+----------------------------------------- */
+
+function dbGetAll(storeName) {
   return new Promise((resolve, reject) => {
-    const req = store.add({
-      ...bike,
-      ownerId: currentUser.id,
-      createdAt: Date.now()
-    });
+    const tx = db.transaction(storeName, "readonly");
+    const store = tx.objectStore(storeName);
+    const req = store.getAll();
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
 }
 
-async function getMyBikes() {
-  if (!currentUser) throw new Error("Not logged in");
-  const tx = db.transaction("bikes", "readonly");
-  const store = tx.objectStore("bikes");
-  const index = store.index("ownerId");
+function dbGet(storeName, id) {
   return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readonly");
+    const store = tx.objectStore(storeName);
+    const req = store.get(id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbAdd(storeName, obj) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+    const req = store.add(obj);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbPut(storeName, obj) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+    const req = store.put(obj);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbDelete(storeName, id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+    const req = store.delete(id);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+  });
+}
+
+/* -----------------------------------------
+   BIKES (PER-USER)
+----------------------------------------- */
+
+async function addBike(bike) {
+  return dbAdd("bikes", {
+    ...bike,
+    ownerId: currentUser.id,
+    createdAt: Date.now()
+  });
+}
+
+async function getMyBikes() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("bikes", "readonly");
+    const store = tx.objectStore("bikes");
+    const index = store.index("ownerId");
     const req = index.getAll(currentUser.id);
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -389,53 +435,31 @@ async function getMyBikes() {
 }
 
 async function updateBike(id, patch) {
-  const tx = db.transaction("bikes", "readwrite");
-  const store = tx.objectStore("bikes");
-  return new Promise((resolve, reject) => {
-    const getReq = store.get(id);
-    getReq.onsuccess = () => {
-      const bike = getReq.result;
-      if (!bike) { reject(new Error("Bike not found")); return; }
-      const putReq = store.put({ ...bike, ...patch });
-      putReq.onsuccess = () => resolve();
-      putReq.onerror = () => reject(putReq.error);
-    };
-    getReq.onerror = () => reject(getReq.error);
-  });
+  const bike = await dbGet("bikes", id);
+  return dbPut("bikes", { ...bike, ...patch });
 }
 
 async function deleteBike(id) {
-  const tx = db.transaction("bikes", "readwrite");
-  const store = tx.objectStore("bikes");
-  return new Promise((resolve, reject) => {
-    const req = store.delete(id);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
+  return dbDelete("bikes", id);
 }
 
-/* ---- Jobs (per-user) ---- */
+/* -----------------------------------------
+   JOBS (PER-USER)
+----------------------------------------- */
+
 async function addJob(job) {
-  if (!currentUser) throw new Error("Not logged in");
-  const tx = db.transaction("jobs", "readwrite");
-  const store = tx.objectStore("jobs");
-  return new Promise((resolve, reject) => {
-    const req = store.add({
-      ...job,
-      ownerId: currentUser.id,
-      createdAt: Date.now()
-    });
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+  return dbAdd("jobs", {
+    ...job,
+    ownerId: currentUser.id,
+    createdAt: Date.now()
   });
 }
 
 async function getMyJobs() {
-  if (!currentUser) throw new Error("Not logged in");
-  const tx = db.transaction("jobs", "readonly");
-  const store = tx.objectStore("jobs");
-  const index = store.index("ownerId");
   return new Promise((resolve, reject) => {
+    const tx = db.transaction("jobs", "readonly");
+    const store = tx.objectStore("jobs");
+    const index = store.index("ownerId");
     const req = index.getAll(currentUser.id);
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
@@ -443,150 +467,532 @@ async function getMyJobs() {
 }
 
 async function updateJob(id, patch) {
-  const tx = db.transaction("jobs", "readwrite");
-  const store = tx.objectStore("jobs");
-  return new Promise((resolve, reject) => {
-    const getReq = store.get(id);
-    getReq.onsuccess = () => {
-      const job = getReq.result;
-      if (!job) { reject(new Error("Job not found")); return; }
-      const putReq = store.put({ ...job, ...patch });
-      putReq.onsuccess = () => resolve();
-      putReq.onerror = () => reject(putReq.error);
-    };
-    getReq.onerror = () => reject(getReq.error);
-  });
+  const job = await dbGet("jobs", id);
+  return dbPut("jobs", { ...job, ...patch });
 }
 
 async function deleteJob(id) {
-  const tx = db.transaction("jobs", "readwrite");
-  const store = tx.objectStore("jobs");
-  return new Promise((resolve, reject) => {
-    const req = store.delete(id);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
+  return dbDelete("jobs", id);
 }
 
-/* ---- Shared Spares ---- */
+/* -----------------------------------------
+   SPARES (SHARED)
+----------------------------------------- */
+
 async function addSpare(spare) {
-  const tx = db.transaction("spares", "readwrite");
-  const store = tx.objectStore("spares");
-  return new Promise((resolve, reject) => {
-    const req = store.add({
-      ...spare,
-      createdAt: Date.now()
-    });
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+  return dbAdd("spares", {
+    ...spare,
+    createdAt: Date.now()
   });
 }
 
 async function getAllSpares() {
-  const tx = db.transaction("spares", "readonly");
-  const store = tx.objectStore("spares");
-  return new Promise((resolve, reject) => {
-    const req = store.getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+  return dbGetAll("spares");
 }
 
 async function updateSpare(id, patch) {
-  const tx = db.transaction("spares", "readwrite");
-  const store = tx.objectStore("spares");
-  return new Promise((resolve, reject) => {
-    const getReq = store.get(id);
-    getReq.onsuccess = () => {
-      const spare = getReq.result;
-      if (!spare) { reject(new Error("Spare not found")); return; }
-      const putReq = store.put({ ...spare, ...patch });
-      putReq.onsuccess = () => resolve();
-      putReq.onerror = () => reject(putReq.error);
-    };
-    getReq.onerror = () => reject(getReq.error);
-  });
+  const spare = await dbGet("spares", id);
+  return dbPut("spares", { ...spare, ...patch });
 }
 
 async function deleteSpare(id) {
-  const tx = db.transaction("spares", "readwrite");
-  const store = tx.objectStore("spares");
-  return new Promise((resolve, reject) => {
-    const req = store.delete(id);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
+  return dbDelete("spares", id);
 }
 
-/* ---- Shared Tools ---- */
+/* -----------------------------------------
+   TOOLS (SHARED)
+----------------------------------------- */
+
 async function addTool(tool) {
-  const tx = db.transaction("tools", "readwrite");
-  const store = tx.objectStore("tools");
-  return new Promise((resolve, reject) => {
-    const req = store.add({
-      ...tool,
-      createdAt: Date.now()
-    });
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+  return dbAdd("tools", {
+    ...tool,
+    createdAt: Date.now()
   });
 }
 
 async function getAllTools() {
-  const tx = db.transaction("tools", "readonly");
-  const store = tx.objectStore("tools");
+  return dbGetAll("tools");
+}
+
+async function updateTool(id, patch) {
+  const tool = await dbGet("tools", id);
+  return dbPut("tools", { ...tool, ...patch });
+}
+
+async function deleteTool(id) {
+  return dbDelete("tools", id);
+}
+
+/* -----------------------------------------
+   LOCATIONS (SHARED)
+----------------------------------------- */
+
+async function addLocation(location) {
+  return dbAdd("locations", {
+    ...location,
+    createdAt: Date.now()
+  });
+}
+
+async function getAllLocations() {
+  return dbGetAll("locations");
+}
+
+async function updateLocation(id, patch) {
+  const loc = await dbGet("locations", id);
+  return dbPut("locations", { ...loc, ...patch });
+}
+
+async function deleteLocation(id) {
+  return dbDelete("locations", id);
+}
+
+/* -----------------------------------------
+   JOB TEMPLATES (SHARED)
+----------------------------------------- */
+
+async function addJobTemplate(template) {
+  return dbAdd("jobTemplates", {
+    ...template,
+    createdAt: Date.now()
+  });
+}
+
+async function getAllJobTemplates() {
+  return dbGetAll("jobTemplates");
+}
+
+async function updateJobTemplate(id, patch) {
+  const tmpl = await dbGet("jobTemplates", id);
+  return dbPut("jobTemplates", { ...tmpl, ...patch });
+}
+
+async function deleteJobTemplate(id) {
+  return dbDelete("jobTemplates", id);
+}
+</script>
+<!-- ============================
+     PART 2 — INDEXEDDB HELPERS
+     ============================ -->
+
+<script>
+/* -----------------------------------------
+   GENERIC DB GET/PUT/DELETE HELPERS
+----------------------------------------- */
+
+function dbGetAll(storeName) {
   return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readonly");
+    const store = tx.objectStore(storeName);
     const req = store.getAll();
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
 }
 
-async function updateTool(id, patch) {
-  const tx = db.transaction("tools", "readwrite");
-  const store = tx.objectStore("tools");
+function dbGet(storeName, id) {
   return new Promise((resolve, reject) => {
-    const getReq = store.get(id);
-    getReq.onsuccess = () => {
-      const tool = getReq.result;
-      if (!tool) { reject(new Error("Tool not found")); return; }
-      const putReq = store.put({ ...tool, ...patch });
-      putReq.onsuccess = () => resolve();
-      putReq.onerror = () => reject(putReq.error);
-    };
-    getReq.onerror = () => reject(getReq.error);
+    const tx = db.transaction(storeName, "readonly");
+    const store = tx.objectStore(storeName);
+    const req = store.get(id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
   });
 }
 
-async function deleteTool(id) {
-  const tx = db.transaction("tools", "readwrite");
-  const store = tx.objectStore("tools");
+function dbAdd(storeName, obj) {
   return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+    const req = store.add(obj);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbPut(storeName, obj) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
+    const req = store.put(obj);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+function dbDelete(storeName, id) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readwrite");
+    const store = tx.objectStore(storeName);
     const req = store.delete(id);
     req.onsuccess = () => resolve();
     req.onerror = () => reject(req.error);
   });
 }
 
-/* ---- Shared Locations ---- */
-async function addLocation(location) {
-  const tx = db.transaction("locations", "readwrite");
-  const store = tx.objectStore("locations");
+/* -----------------------------------------
+   BIKES (PER-USER)
+----------------------------------------- */
+
+async function addBike(bike) {
+  return dbAdd("bikes", {
+    ...bike,
+    ownerId: currentUser.id,
+    createdAt: Date.now()
+  });
+}
+
+async function getMyBikes() {
   return new Promise((resolve, reject) => {
-    const req = store.add({
-      ...location,
-      createdAt: Date.now()
-    });
+    const tx = db.transaction("bikes", "readonly");
+    const store = tx.objectStore("bikes");
+    const index = store.index("ownerId");
+    const req = index.getAll(currentUser.id);
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
   });
 }
 
+async function updateBike(id, patch) {
+  const bike = await dbGet("bikes", id);
+  return dbPut("bikes", { ...bike, ...patch });
+}
+
+async function deleteBike(id) {
+  return dbDelete("bikes", id);
+}
+
+/* -----------------------------------------
+   JOBS (PER-USER)
+----------------------------------------- */
+
+async function addJob(job) {
+  return dbAdd("jobs", {
+    ...job,
+    ownerId: currentUser.id,
+    createdAt: Date.now()
+  });
+}
+
+async function getMyJobs() {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction("jobs", "readonly");
+    const store = tx.objectStore("jobs");
+    const index = store.index("ownerId");
+    const req = index.getAll(currentUser.id);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+
+async function updateJob(id, patch) {
+  const job = await dbGet("jobs", id);
+  return dbPut("jobs", { ...job, ...patch });
+}
+
+async function deleteJob(id) {
+  return dbDelete("jobs", id);
+}
+
+/* -----------------------------------------
+   SPARES (SHARED)
+----------------------------------------- */
+
+async function addSpare(spare) {
+  return dbAdd("spares", {
+    ...spare,
+    createdAt: Date.now()
+  });
+}
+
+async function getAllSpares() {
+  return dbGetAll("spares");
+}
+
+async function updateSpare(id, patch) {
+  const spare = await dbGet("spares", id);
+  return dbPut("spares", { ...spare, ...patch });
+}
+
+async function deleteSpare(id) {
+  return dbDelete("spares", id);
+}
+
+/* -----------------------------------------
+   TOOLS (SHARED)
+----------------------------------------- */
+
+async function addTool(tool) {
+  return dbAdd("tools", {
+    ...tool,
+    createdAt: Date.now()
+  });
+}
+
+async function getAllTools() {
+  return dbGetAll("tools");
+}
+
+async function updateTool(id, patch) {
+  const tool = await dbGet("tools", id);
+  return dbPut("tools", { ...tool, ...patch });
+}
+
+async function deleteTool(id) {
+  return dbDelete("tools", id);
+}
+
+/* -----------------------------------------
+   LOCATIONS (SHARED)
+----------------------------------------- */
+
+async function addLocation(location) {
+  return dbAdd("locations", {
+    ...location,
+    createdAt: Date.now()
+  });
+}
+
 async function getAllLocations() {
-  const tx = db.transaction("locations", "readonly");
-  const store = tx.objectStore
+  return dbGetAll("locations");
+}
+
+async function updateLocation(id, patch) {
+  const loc = await dbGet("locations", id);
+  return dbPut("locations", { ...loc, ...patch });
+}
+
+async function deleteLocation(id) {
+  return dbDelete("locations", id);
+}
+
+/* -----------------------------------------
+   JOB TEMPLATES (SHARED)
+----------------------------------------- */
+
+async function addJobTemplate(template) {
+  return dbAdd("jobTemplates", {
+    ...template,
+    createdAt: Date.now()
+  });
+}
+
+async function getAllJobTemplates() {
+  return dbGetAll("jobTemplates");
+}
+
+async function updateJobTemplate(id, patch) {
+  const tmpl = await dbGet("jobTemplates", id);
+  return dbPut("jobTemplates", { ...tmpl, ...patch });
+}
+
+async function deleteJobTemplate(id) {
+  return dbDelete("jobTemplates", id);
+}
+</script>
+<!-- ============================
+     PART 3 — WORKSHOP UI SHELL
+     ============================ -->
+
+<style>
+  .app-shell {
+    display: none;
+    grid-template-columns: 260px 1fr;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+
+  .sidebar-title {
+    font-size: 1.3rem;
+    font-weight: bold;
+  }
+
+  .nav-section-label {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 6px;
+  }
+
+  .nav-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .nav-item {
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .nav-item.active {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+
+  .sidebar-footer {
+    margin-top: auto;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .main {
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-alt);
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+  }
+
+  .header-left {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+
+  .logo-circle img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+  }
+
+  .header-title-main {
+    font-size: 1.2rem;
+    font-weight: bold;
+  }
+
+  .header-title-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+
+  .pill {
+    padding: 6px 12px;
+    border-radius: 20px;
+    background: var(--border);
+    color: var(--text);
+    display: inline-block;
+  }
+
+  .pill-accent {
+    background: var(--accent-soft);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+
+  .pill-danger {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+  }
+
+  .content {
+    padding: 20px;
+    flex: 1;
+  }
+
+  .page {
+    display: none;
+  }
+
+  .page.active {
+    display: block;
+  }
+
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+
+  .page-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+  }
+
+  .page-subtitle {
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+
+  .badge {
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    background: var(--border);
+    color: var(--text);
+  }
+
+  .badge-ok {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+
+  .badge-warn {
+    background: rgba(249, 115, 22, 0.15);
+    color: var(--warning);
+  }
+
+  .page-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 12px;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .card-title {
+    font-weight: bold;
+  }
+
+  .list {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .footer {
+    padding: 12px;
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+  }
+</style>
+
 <!-- WORKSHOP APP SHELL -->
-<div class="app-shell" id="app-shell" style="display:none;">
+<div class="app-shell" id="app-shell">
+
   <!-- Sidebar -->
   <aside class="sidebar">
     <div>
@@ -599,68 +1005,46 @@ async function getAllLocations() {
     <div>
       <div class="nav-section-label">Workshop</div>
       <ul class="nav-list">
-        <li class="nav-item active" data-page="dashboard">
-          <span class="icon">🏁</span>
-          <span>Dashboard</span>
-        </li>
-        <li class="nav-item" data-page="bikes">
-          <span class="icon">🚲</span>
-          <span>Bikes</span>
-        </li>
-        <li class="nav-item" data-page="spares">
-          <span class="icon">🧩</span>
-          <span>Spares</span>
-        </li>
-        <li class="nav-item" data-page="tools">
-          <span class="icon">🛠️</span>
-          <span>Tools</span>
-        </li>
-        <li class="nav-item" data-page="jobs">
-          <span class="icon">📋</span>
-          <span>Jobs</span>
-        </li>
-        <li class="nav-item" data-page="locations">
-          <span class="icon">📦</span>
-          <span>Locations</span>
-        </li>
+        <li class="nav-item active" data-page="dashboard">🏁 Dashboard</li>
+        <li class="nav-item" data-page="bikes">🚲 Bikes</li>
+        <li class="nav-item" data-page="spares">🧩 Spares</li>
+        <li class="nav-item" data-page="tools">🛠️ Tools</li>
+        <li class="nav-item" data-page="jobs">📋 Jobs</li>
+        <li class="nav-item" data-page="locations">📦 Locations</li>
       </ul>
     </div>
 
     <div>
       <div class="nav-section-label">Admin</div>
       <ul class="nav-list">
-        <li class="nav-item" data-page="admin">
-          <span class="icon">⚙️</span>
-          <span>Admin</span>
-        </li>
-        <li class="nav-item" data-page="design-doc">
-          <span class="icon">📘</span>
-          <span>Design Document</span>
-        </li>
+        <li class="nav-item" data-page="admin">⚙️ Admin</li>
+        <li class="nav-item" data-page="design-doc">📘 Design Document</li>
       </ul>
     </div>
 
     <div class="sidebar-footer">
-      <div>Digital Bike Workshop · Local-first</div>
-      <div style="margin-top:4px;">Relentless Attacks · Jones Street Cycles</div>
+      Digital Bike Workshop · Local-first  
+      <br>Relentless Attacks · Jones Street Cycles
     </div>
   </aside>
 
   <!-- Main -->
   <div class="main">
+
     <!-- Header -->
     <header class="header">
       <div class="header-left">
         <div class="logo-circle">
           <img src="logo.png" alt="Workshop Logo" />
         </div>
-        <div class="header-title">
+        <div>
           <div class="header-title-main">Digital Bike Workshop</div>
           <div class="header-title-sub">
             Cycling spares, jobs, tools & community · Local-first
           </div>
         </div>
       </div>
+
       <div class="header-right">
         <div class="pill pill-accent">Logged in as: <span id="header-username"></span></div>
         <div class="pill" id="logout-btn" style="cursor:pointer;">Logout</div>
@@ -683,7 +1067,7 @@ async function getAllLocations() {
         <div class="page-grid">
           <div class="card">
             <div class="card-header">
-              <div class="card-title"><span class="icon">🚲</span>Bikes</div>
+              <div class="card-title">🚲 Bikes</div>
               <div class="badge badge-ok">Per-user</div>
             </div>
             <ul class="list" id="dashboard-bikes"></ul>
@@ -691,7 +1075,7 @@ async function getAllLocations() {
 
           <div class="card">
             <div class="card-header">
-              <div class="card-title"><span class="icon">🧩</span>Spares</div>
+              <div class="card-title">🧩 Spares</div>
               <div class="badge badge-warn">Shared</div>
             </div>
             <ul class="list" id="dashboard-spares"></ul>
@@ -701,7 +1085,7 @@ async function getAllLocations() {
         <div class="page-grid" style="margin-top:12px;">
           <div class="card">
             <div class="card-header">
-              <div class="card-title"><span class="icon">🛠️</span>Tools</div>
+              <div class="card-title">🛠️ Tools</div>
               <div class="badge badge-ok">Shared</div>
             </div>
             <ul class="list" id="dashboard-tools"></ul>
@@ -709,7 +1093,7 @@ async function getAllLocations() {
 
           <div class="card">
             <div class="card-header">
-              <div class="card-title"><span class="icon">📋</span>Jobs</div>
+              <div class="card-title">📋 Jobs</div>
               <div class="badge badge-warn">Per-user</div>
             </div>
             <ul class="list" id="dashboard-jobs"></ul>
@@ -788,7 +1172,7 @@ async function getAllLocations() {
 
         <div class="card">
           <div class="card-header">
-            <div class="card-title"><span class="icon">⚙️</span>Database Tools</div>
+            <div class="card-title">⚙️ Database Tools</div>
           </div>
           <button class="pill pill-accent" id="export-db-btn">Export Database</button>
           <button class="pill pill-danger" id="clear-db-btn">Clear Database</button>
@@ -804,7 +1188,7 @@ async function getAllLocations() {
           </div>
         </div>
 
-        <div class="card design-doc">
+        <div class="card">
           <h1>Cycling Spares App · Digital Bike Workshop</h1>
           <p>This page will contain your full design document.</p>
         </div>
@@ -814,15 +1198,15 @@ async function getAllLocations() {
 
     <!-- Footer -->
     <footer class="footer">
-      <span>Version 1.0 — September 2026</span>
-      <span>© Adam Otis Farrugia</span>
+      Version 1.0 — September 2026 · © Adam Otis Farrugia
     </footer>
+
   </div>
 </div>
 
 <script>
 /* ============================
-   SECTION 3 — PAGE SWITCHING
+   PART 3 — PAGE SWITCHING
    ============================ */
 
 const navItems = document.querySelectorAll(".nav-item");
@@ -843,6 +1227,13 @@ navItems.forEach(item => {
 function showWorkshopUI() {
   document.getElementById("app-shell").style.display = "grid";
   document.getElementById("header-username").textContent = currentUser.username;
+
+  renderDashboard();
+  renderBikes();
+  renderSpares();
+  renderTools();
+  renderJobs();
+  renderLocations();
 }
 
 /* Logout */
@@ -861,11 +1252,10 @@ if (savedSession) {
 }
 </script>
 <!-- ============================
-     SECTION 4 — CRUD MODALS
+     PART 4 — CRUD MODALS + LOGIC
      ============================ -->
 
 <style>
-  /* Simple modal styling */
   .modal {
     position: fixed;
     inset: 0;
@@ -980,7 +1370,7 @@ if (savedSession) {
 
 <script>
 /* ============================
-   SECTION 4 — CRUD LOGIC
+   PART 4 — CRUD LOGIC
    ============================ */
 
 let editingBikeId = null;
@@ -991,7 +1381,7 @@ let editingLocationId = null;
 
 /* ---------------------------
    BIKE MODAL
-   --------------------------- */
+--------------------------- */
 function openBikeModal(bike = null) {
   const modal = document.getElementById("modal-bike");
   modal.style.display = "flex";
@@ -1037,7 +1427,7 @@ document.getElementById("bike-save-btn").onclick = async () => {
 
 /* ---------------------------
    SPARE MODAL
-   --------------------------- */
+--------------------------- */
 function openSpareModal(spare = null) {
   const modal = document.getElementById("modal-spare");
   modal.style.display = "flex";
@@ -1083,7 +1473,7 @@ document.getElementById("spare-save-btn").onclick = async () => {
 
 /* ---------------------------
    TOOL MODAL
-   --------------------------- */
+--------------------------- */
 function openToolModal(tool = null) {
   const modal = document.getElementById("modal-tool");
   modal.style.display = "flex";
@@ -1129,7 +1519,7 @@ document.getElementById("tool-save-btn").onclick = async () => {
 
 /* ---------------------------
    JOB MODAL
-   --------------------------- */
+--------------------------- */
 function openJobModal(job = null) {
   const modal = document.getElementById("modal-job");
   modal.style.display = "flex";
@@ -1172,7 +1562,7 @@ document.getElementById("job-save-btn").onclick = async () => {
 
 /* ---------------------------
    LOCATION MODAL
-   --------------------------- */
+--------------------------- */
 function openLocationModal(loc = null) {
   const modal = document.getElementById("modal-location");
   modal.style.display = "flex";
@@ -1215,7 +1605,7 @@ document.getElementById("location-save-btn").onclick = async () => {
 
 /* ============================
    RENDER FUNCTIONS
-   ============================ */
+============================ */
 
 async function renderBikes() {
   const bikes = await getMyBikes();
@@ -1322,7 +1712,7 @@ async function renderLocations() {
 
 /* ============================
    DASHBOARD RENDER
-   ============================ */
+============================ */
 
 async function renderDashboard() {
   const bikes = await getMyBikes();
@@ -1330,44 +1720,49 @@ async function renderDashboard() {
   const tools = await getAllTools();
   const jobs = await getMyJobs();
 
-  const dbBikes = document.getElementById("dashboard-bikes");
-  const dbSpares = document.getElementById("dashboard-spares");
-  const dbTools = document.getElementById("dashboard-tools");
-  const dbJobs = document.getElementById("dashboard-jobs");
+  document.getElementById("dashboard-bikes").innerHTML =
+    bikes.map(b => `<li>${b.name}</li>`).join("");
 
-  dbBikes.innerHTML = bikes.map(b => `<li>${b.name}</li>`).join("");
-  dbSpares.innerHTML = spares.map(s => `<li>${s.name}</li>`).join("");
-  dbTools.innerHTML = tools.map(t => `<li>${t.name}</li>`).join("");
-  dbJobs
+  document.getElementById("dashboard-spares").innerHTML =
+    spares.map(s => `<li>${s.name}</li>`).join("");
+
+  document.getElementById("dashboard-tools").innerHTML =
+    tools.map(t => `<li>${t.name}</li>`).join("");
+
+  document.getElementById("dashboard-jobs").innerHTML =
+    jobs.map(j => `<li>${j.name}</li>`).join("");
+}
+</script>
+<!-- ============================
+     PART 5 — LINKING LOGIC
+     ============================ -->
+
 <script>
-/* ============================
-   SECTION 5 — LINKING LOGIC
-   ============================ */
-
+/* -----------------------------------------
+   LINKING MODEL
+----------------------------------------- */
 /*
-  Linking model:
-
   Bikes:
-    - linkedSpares: [spareId]
-    - linkedJobs:   [jobId]
+    linkedSpares: [spareId]
+    linkedJobs:   [jobId]
 
   Spares:
-    - locationId: locationId
+    locationId: locationId
 
   Jobs:
-    - linkedTools: [toolId]
-    - bikeId:      bikeId
+    linkedTools: [toolId]
+    bikeId:      bikeId
 
   Tools:
-    - no direct links (jobs link to tools)
+    (no direct links)
 
   Locations:
-    - no direct links (spares link to locations)
+    (no direct links)
 */
 
-/* ---------------------------
-   Helper: get item by ID
-   --------------------------- */
+/* -----------------------------------------
+   GENERIC GET BY ID
+----------------------------------------- */
 async function getById(storeName, id) {
   const tx = db.transaction(storeName, "readonly");
   const store = tx.objectStore(storeName);
@@ -1378,45 +1773,41 @@ async function getById(storeName, id) {
   });
 }
 
-/* ---------------------------
-   Linking Spares → Bikes
-   --------------------------- */
+/* -----------------------------------------
+   SPARES → BIKES
+----------------------------------------- */
 async function linkSpareToBike(bikeId, spareId) {
   const bike = await getById("bikes", bikeId);
-  if (!bike.linkedSpares) bike.linkedSpares = [];
-  if (!bike.linkedSpares.includes(spareId)) {
-    bike.linkedSpares.push(spareId);
-  }
-  await updateBike(bikeId, { linkedSpares: bike.linkedSpares });
+  const list = bike.linkedSpares || [];
+  if (!list.includes(spareId)) list.push(spareId);
+  await updateBike(bikeId, { linkedSpares: list });
 }
 
 async function unlinkSpareFromBike(bikeId, spareId) {
   const bike = await getById("bikes", bikeId);
-  bike.linkedSpares = (bike.linkedSpares || []).filter(id => id !== spareId);
-  await updateBike(bikeId, { linkedSpares: bike.linkedSpares });
+  const list = (bike.linkedSpares || []).filter(id => id !== spareId);
+  await updateBike(bikeId, { linkedSpares: list });
 }
 
-/* ---------------------------
-   Linking Tools → Jobs
-   --------------------------- */
+/* -----------------------------------------
+   TOOLS → JOBS
+----------------------------------------- */
 async function linkToolToJob(jobId, toolId) {
   const job = await getById("jobs", jobId);
-  if (!job.linkedTools) job.linkedTools = [];
-  if (!job.linkedTools.includes(toolId)) {
-    job.linkedTools.push(toolId);
-  }
-  await updateJob(jobId, { linkedTools: job.linkedTools });
+  const list = job.linkedTools || [];
+  if (!list.includes(toolId)) list.push(toolId);
+  await updateJob(jobId, { linkedTools: list });
 }
 
 async function unlinkToolFromJob(jobId, toolId) {
   const job = await getById("jobs", jobId);
-  job.linkedTools = (job.linkedTools || []).filter(id => id !== toolId);
-  await updateJob(jobId, { linkedTools: job.linkedTools });
+  const list = (job.linkedTools || []).filter(id => id !== toolId);
+  await updateJob(jobId, { linkedTools: list });
 }
 
-/* ---------------------------
-   Linking Jobs → Bikes
-   --------------------------- */
+/* -----------------------------------------
+   JOBS → BIKES
+----------------------------------------- */
 async function linkJobToBike(jobId, bikeId) {
   await updateJob(jobId, { bikeId });
 }
@@ -1425,9 +1816,9 @@ async function unlinkJobFromBike(jobId) {
   await updateJob(jobId, { bikeId: null });
 }
 
-/* ---------------------------
-   Linking Locations → Spares
-   --------------------------- */
+/* -----------------------------------------
+   LOCATIONS → SPARES
+----------------------------------------- */
 async function assignSpareLocation(spareId, locationId) {
   await updateSpare(spareId, { locationId });
 }
@@ -1436,25 +1827,26 @@ async function clearSpareLocation(spareId) {
   await updateSpare(spareId, { locationId: null });
 }
 
-/* ============================
-   UI FOR LINKING
-   ============================ */
+/* -----------------------------------------
+   UI LINKING RENDERERS
+----------------------------------------- */
 
-/* Render linking options inside cards */
 async function renderLinkingForBike(div, bike) {
   const spares = await getAllSpares();
   const jobs = await getMyJobs();
 
   const linkedSpares = bike.linkedSpares || [];
-  const linkedJobs = bike.linkedJobs || [];
 
   div.innerHTML += `
     <h3>Linked Spares</h3>
     <ul>
       ${linkedSpares.map(id => {
         const s = spares.find(x => x.id === id);
-        return `<li>${s ? s.name : "Unknown"} 
-          <button class="pill pill-danger" onclick="unlinkSpareFromBike(${bike.id}, ${id}).then(renderBikes).then(renderDashboard)">Remove</button>
+        return `<li>${s ? s.name : "Unknown"}
+          <button class="pill pill-danger"
+            onclick="unlinkSpareFromBike(${bike.id}, ${id}).then(renderBikes).then(renderDashboard)">
+            Remove
+          </button>
         </li>`;
       }).join("")}
     </ul>
@@ -1463,13 +1855,20 @@ async function renderLinkingForBike(div, bike) {
       <option value="">Link spare…</option>
       ${spares.map(s => `<option value="${s.id}">${s.name}</option>`).join("")}
     </select>
-    <button class="pill pill-accent" onclick="const sid=document.getElementById('link-spare-${bike.id}').value; if(sid) linkSpareToBike(${bike.id}, Number(sid)).then(renderBikes).then(renderDashboard)">Add Spare</button>
+    <button class="pill pill-accent"
+      onclick="const sid=document.getElementById('link-spare-${bike.id}').value;
+               if(sid) linkSpareToBike(${bike.id}, Number(sid)).then(renderBikes).then(renderDashboard)">
+      Add Spare
+    </button>
 
     <h3>Linked Jobs</h3>
     <ul>
       ${jobs.filter(j => j.bikeId === bike.id).map(j => `
         <li>${j.name}
-          <button class="pill pill-danger" onclick="unlinkJobFromBike(${j.id}).then(renderBikes).then(renderDashboard)">Remove</button>
+          <button class="pill pill-danger"
+            onclick="unlinkJobFromBike(${j.id}).then(renderBikes).then(renderDashboard)">
+            Remove
+          </button>
         </li>
       `).join("")}
     </ul>
@@ -1478,7 +1877,11 @@ async function renderLinkingForBike(div, bike) {
       <option value="">Link job…</option>
       ${jobs.map(j => `<option value="${j.id}">${j.name}</option>`).join("")}
     </select>
-    <button class="pill pill-accent" onclick="const jid=document.getElementById('link-job-${bike.id}').value; if(jid) linkJobToBike(Number(jid), ${bike.id}).then(renderBikes).then(renderDashboard)">Add Job</button>
+    <button class="pill pill-accent"
+      onclick="const jid=document.getElementById('link-job-${bike.id}').value;
+               if(jid) linkJobToBike(Number(jid), ${bike.id}).then(renderBikes).then(renderDashboard)">
+      Add Job
+    </button>
   `;
 }
 
@@ -1495,9 +1898,16 @@ async function renderLinkingForSpare(div, spare) {
       ${locations.map(l => `<option value="${l.id}">${l.name}</option>`).join("")}
     </select>
 
-    <button class="pill pill-accent" onclick="const lid=document.getElementById('assign-location-${spare.id}').value; if(lid) assignSpareLocation(${spare.id}, Number(lid)).then(renderSpares).then(renderDashboard)">Assign</button>
+    <button class="pill pill-accent"
+      onclick="const lid=document.getElementById('assign-location-${spare.id}').value;
+               if(lid) assignSpareLocation(${spare.id}, Number(lid)).then(renderSpares).then(renderDashboard)">
+      Assign
+    </button>
 
-    <button class="pill pill-danger" onclick="clearSpareLocation(${spare.id}).then(renderSpares).then(renderDashboard)">Clear</button>
+    <button class="pill pill-danger"
+      onclick="clearSpareLocation(${spare.id}).then(renderSpares).then(renderDashboard)">
+      Clear
+    </button>
   `;
 }
 
@@ -1513,8 +1923,11 @@ async function renderLinkingForJob(div, job) {
     <ul>
       ${linkedTools.map(id => {
         const t = tools.find(x => x.id === id);
-        return `<li>${t ? t.name : "Unknown"} 
-          <button class="pill pill-danger" onclick="unlinkToolFromJob(${job.id}, ${id}).then(renderJobs).then(renderDashboard)">Remove</button>
+        return `<li>${t ? t.name : "Unknown"}
+          <button class="pill pill-danger"
+            onclick="unlinkToolFromJob(${job.id}, ${id}).then(renderJobs).then(renderDashboard)">
+            Remove
+          </button>
         </li>`;
       }).join("")}
     </ul>
@@ -1523,7 +1936,11 @@ async function renderLinkingForJob(div, job) {
       <option value="">Link tool…</option>
       ${tools.map(t => `<option value="${t.id}">${t.name}</option>`).join("")}
     </select>
-    <button class="pill pill-accent" onclick="const tid=document.getElementById('link-tool-${job.id}').value; if(tid) linkToolToJob(${job.id}, Number(tid)).then(renderJobs).then(renderDashboard)">Add Tool</button>
+    <button class="pill pill-accent"
+      onclick="const tid=document.getElementById('link-tool-${job.id}').value;
+               if(tid) linkToolToJob(${job.id}, Number(tid)).then(renderJobs).then(renderDashboard)">
+      Add Tool
+    </button>
 
     <h3>Assigned Bike</h3>
     <p>${bike ? bike.name : "None"}</p>
@@ -1533,15 +1950,22 @@ async function renderLinkingForJob(div, job) {
       ${bikes.map(b => `<option value="${b.id}">${b.name}</option>`).join("")}
     </select>
 
-    <button class="pill pill-accent" onclick="const bid=document.getElementById('assign-bike-${job.id}').value; if(bid) linkJobToBike(${job.id}, Number(bid)).then(renderJobs).then(renderDashboard)">Assign</button>
+    <button class="pill pill-accent"
+      onclick="const bid=document.getElementById('assign-bike-${job.id}').value;
+               if(bid) linkJobToBike(${job.id}, Number(bid)).then(renderJobs).then(renderDashboard)">
+      Assign
+    </button>
 
-    <button class="pill pill-danger" onclick="unlinkJobFromBike(${job.id}).then(renderJobs).then(renderDashboard)">Clear</button>
+    <button class="pill pill-danger"
+      onclick="unlinkJobFromBike(${job.id}).then(renderJobs).then(renderDashboard)">
+      Clear
+    </button>
   `;
 }
 
-/* ============================
+/* -----------------------------------------
    EXTEND RENDER FUNCTIONS
-   ============================ */
+----------------------------------------- */
 
 const oldRenderBikes = renderBikes;
 renderBikes = async function() {
@@ -1559,7 +1983,10 @@ renderBikes = async function() {
       </div>
       <p>${bike.notes || ""}</p>
       <button class="pill pill-accent" onclick='openBikeModal(${JSON.stringify(bike)})'>Edit</button>
-      <button class="pill pill-danger" onclick='deleteBike(${bike.id}).then(renderBikes).then(renderDashboard)'>Delete</button>
+      <button class="pill pill-danger"
+        onclick='deleteBike(${bike.id}).then(renderBikes).then(renderDashboard)'>
+        Delete
+      </button>
     `;
     await renderLinkingForBike(div, bike);
     container.appendChild(div);
@@ -1582,7 +2009,10 @@ renderSpares = async function() {
       </div>
       <p>${spare.notes || ""}</p>
       <button class="pill pill-accent" onclick='openSpareModal(${JSON.stringify(spare)})'>Edit</button>
-      <button class="pill pill-danger" onclick='deleteSpare(${spare.id}).then(renderSpares).then(renderDashboard)'>Delete</button>
+      <button class="pill pill-danger"
+        onclick='deleteSpare(${spare.id}).then(renderSpares).then(renderDashboard)'>
+        Delete
+      </button>
     `;
     await renderLinkingForSpare(div, spare);
     container.appendChild(div);
@@ -1604,21 +2034,24 @@ renderJobs = async function() {
       </div>
       <p>${job.notes || ""}</p>
       <button class="pill pill-accent" onclick='openJobModal(${JSON.stringify(job)})'>Edit</button>
-      <button class="pill pill-danger" onclick='deleteJob(${job.id}).then(renderJobs).then(renderDashboard)'>Delete</button>
+      <button class="pill pill-danger"
+        onclick='deleteJob(${job.id}).then(renderJobs).then(renderDashboard)'>
+        Delete
+      </button>
     `;
     await renderLinkingForJob(div, job);
     container.appendChild(div);
   }
 };
 </script>
-<script>
-/* ============================
-   SECTION 6 — EXPORT / IMPORT
-   ============================ */
+<!-- ============================
+     PART 6 — EXPORT / IMPORT / CLEAR
+     ============================ -->
 
-/* ---------------------------
+<script>
+/* -----------------------------------------
    EXPORT DATABASE
-   --------------------------- */
+----------------------------------------- */
 async function exportDatabase() {
   const stores = [
     "users",
@@ -1644,7 +2077,6 @@ async function exportDatabase() {
   }
 
   const json = JSON.stringify(exportObj, null, 2);
-
   const blob = new Blob([json], { type: "application/json" });
   const url = URL.createObjectURL(blob);
 
@@ -1656,9 +2088,9 @@ async function exportDatabase() {
   URL.revokeObjectURL(url);
 }
 
-/* ---------------------------
+/* -----------------------------------------
    IMPORT DATABASE
-   --------------------------- */
+----------------------------------------- */
 async function importDatabase(jsonData) {
   let data;
   try {
@@ -1678,7 +2110,7 @@ async function importDatabase(jsonData) {
     "jobTemplates"
   ];
 
-  // Clear each store before import
+  // Clear each store
   for (const storeName of stores) {
     const tx = db.transaction(storeName, "readwrite");
     const store = tx.objectStore(storeName);
@@ -1714,9 +2146,9 @@ async function importDatabase(jsonData) {
   renderLocations();
 }
 
-/* ---------------------------
+/* -----------------------------------------
    CLEAR DATABASE (ADMIN ONLY)
-   --------------------------- */
+----------------------------------------- */
 async function clearDatabase() {
   if (!currentUser || currentUser.role !== "administrator") {
     alert("Admin only");
@@ -1747,9 +2179,9 @@ async function clearDatabase() {
   location.reload();
 }
 
-/* ---------------------------
+/* -----------------------------------------
    UI HOOKS
-   --------------------------- */
+----------------------------------------- */
 document.getElementById("export-db-btn").onclick = () => {
   if (currentUser.role !== "administrator") {
     alert("Admin only");
@@ -1762,7 +2194,7 @@ document.getElementById("clear-db-btn").onclick = () => {
   clearDatabase();
 };
 
-/* Import button (admin page) */
+/* Import button */
 const importInput = document.createElement("input");
 importInput.type = "file";
 importInput.accept = ".json";
@@ -1789,160 +2221,4 @@ importBtn.onclick = () => {
 
 document.getElementById("page-admin").appendChild(importBtn);
 document.getElementById("page-admin").appendChild(importInput);
-</script>
-<!-- ============================
-     SECTION 7 — FINAL ASSEMBLY
-     ============================ -->
-
-<script>
-/*
-  SECTION 7 — FINAL ASSEMBLY & DEPLOYMENT GUIDE
-  ----------------------------------------------
-
-  Your Digital Bike Workshop is now fully functional.
-
-  This section explains how to assemble the final file,
-  deploy it to GitHub Pages, and verify everything works.
-
-  ----------------------------------------------
-  1. ASSEMBLE THE FINAL SINGLE-FILE APP
-  ----------------------------------------------
-
-  Your final file should contain Sections 1–6 in this order:
-
-    SECTION 1 — <head>, CSS, Login Page
-    SECTION 2 — IndexedDB Hybrid Data Helpers
-    SECTION 3 — Workshop UI Shell
-    SECTION 4 — CRUD Modals + UI Hooks
-    SECTION 5 — Linking Logic
-    SECTION 6 — Export / Import
-
-  Make sure:
-    - All <script> blocks remain in order
-    - All <style> blocks remain in order
-    - No duplicate <html>, <head>, or <body> tags
-    - The login screen appears before the workshop UI
-
-  ----------------------------------------------
-  2. DEPLOY TO GITHUB PAGES
-  ----------------------------------------------
-
-  Steps:
-    1. Go to your GitHub repo:
-         https://github.com/otissnr/Bikeworks
-
-    2. Replace your current index.html with:
-         bikeworkshop.html
-
-    3. Commit and push.
-
-    4. Ensure GitHub Pages is enabled:
-         Settings → Pages → Deploy from main branch
-
-    5. Your app will be live at:
-         https://otissnr.github.io/Bikeworks
-
-  ----------------------------------------------
-  3. VERIFY LOGIN SYSTEM
-  ----------------------------------------------
-
-  Test the built-in admin account:
-
-    Username: admin
-    Password: workshop
-
-  Then:
-    - Create a new user
-    - Log out
-    - Log in as the new user
-    - Confirm bikes/jobs are per-user
-    - Confirm spares/tools/locations are shared
-
-  ----------------------------------------------
-  4. VERIFY DATABASE FUNCTIONALITY
-  ----------------------------------------------
-
-  Test each page:
-
-    Bikes:
-      - Add a bike
-      - Edit it
-      - Delete it
-
-    Spares:
-      - Add a spare
-      - Assign a location
-      - Link to a bike
-
-    Tools:
-      - Add a tool
-      - Link to a job
-
-    Jobs:
-      - Add a job
-      - Assign to a bike
-      - Link tools
-
-    Locations:
-      - Add a location
-      - Assign spares
-
-  ----------------------------------------------
-  5. VERIFY LINKING LOGIC
-  ----------------------------------------------
-
-  Bikes ↔ Spares:
-    - Link spare to bike
-    - Remove link
-
-  Jobs ↔ Tools:
-    - Link tool to job
-    - Remove link
-
-  Jobs ↔ Bikes:
-    - Assign job to bike
-    - Clear assignment
-
-  Spares ↔ Locations:
-    - Assign spare to location
-    - Clear location
-
-  ----------------------------------------------
-  6. VERIFY EXPORT / IMPORT
-  ----------------------------------------------
-
-  As admin:
-    - Export database (JSON file)
-    - Clear database
-    - Import JSON file
-    - Confirm all data restored
-
-  ----------------------------------------------
-  7. OPTIONAL: CUSTOMIZE UI
-  ----------------------------------------------
-
-  You can safely modify:
-    - Colors (CSS variables in :root)
-    - Logo (replace logo.png)
-    - Sidebar labels
-    - Page titles
-    - Design Document content
-
-  ----------------------------------------------
-  8. OPTIONAL: ADD FEATURES LATER
-  ----------------------------------------------
-
-  The architecture supports:
-    - Job templates
-    - Spare compatibility rules
-    - Tool calibration logs
-    - Bike service history
-    - Multi-user permissions
-    - Dark/light theme toggle
-    - Sync via manual JSON export/import
-
-  ----------------------------------------------
-  END OF SECTION 7
-  ----------------------------------------------
-*/
 </script>
