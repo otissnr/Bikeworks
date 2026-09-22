@@ -179,11 +179,11 @@
 
   /* Collapse the desktop two-column shell to a single column
      now that the sidebar is hidden */
-  .app-shell {
+  #app-shell {
     grid-template-columns: 1fr;
   }
 
-  .sidebar {
+  #sidebar {
     display: none;
   }
 
@@ -211,7 +211,7 @@
   }
 
   /* Keep content clear of the fixed bottom tab bar */
-  .content {
+  .app-shell .content {
     padding: 16px;
     padding-bottom: 80px;
   }
@@ -794,7 +794,7 @@ async function deleteCustomField(id) {
 
 <div class="app-shell" id="app-shell">
 
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div>
       <div class="sidebar-title">Digital Bike Workshop</div>
       <div style="font-size:0.8rem;color:var(--muted);margin-top:4px;">
@@ -981,7 +981,7 @@ async function deleteCustomField(id) {
     </main>
 
     <footer class="footer">
-      Version 1.7 — September 2026 · © Adam Otis Farrugia
+      Version 1.8 — September 2026 · © Adam Otis Farrugia
     </footer>
   </div>
 </div>
