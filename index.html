@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Digital Bike Workshop</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     :root {
       --bg: #020617;
@@ -256,7 +257,7 @@
 <div class="center-screen" id="login-screen">
   <div class="login-card">
     <div class="login-title">Digital Bike Workshop JSCC</div>
-    <div class="login-subtitle">Local-first cycling spares & tools database.</div>
+    <div class="login-subtitle">Cloud-synced cycling spares & tools database.</div>
 
     <input id="login-username" placeholder="Username" />
     <input id="login-password" type="password" placeholder="Password" />
@@ -270,118 +271,122 @@
 </div>
 
 <script>
-let db = null;
+/* ============================================
+   SUPABASE CONNECTION — fill these in from your
+   Supabase project's Settings > API page
+   ============================================ */
+const SUPABASE_URL = https://swsjvfyoefecntawmxei.supabase.co/rest/v1/;       // e.g. https://abcxyz.supabase.co
+const SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3c2p2ZnlvZWZlY250YXdteGVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTY1OTUsImV4cCI6MjEwNTYzMjU5NX0.ptWYqr2Ecf-ZxMW2vngPM-MHS64B1ai__OzQiYR5zik;
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 let currentUser = null;
 
-function openDatabase() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open("bikeWorkshopDB", 3);
+/* storeName (camelCase, as used throughout this app) -> actual Postgres table name */
+const TABLE_NAME = {
+  users: "users",
+  bikes: "bikes",
+  spares: "spares",
+  tools: "tools",
+  locations: "locations",
+  jobTemplates: "job_templates",
+  customFields: "custom_fields",
+};
 
-    req.onupgradeneeded = (event) => {
-      db = event.target.result;
-
-      if (!db.objectStoreNames.contains("users")) {
-        db.createObjectStore("users", { keyPath: "id", autoIncrement: true });
-      }
-      if (!db.objectStoreNames.contains("bikes")) {
-        const store = db.createObjectStore("bikes", { keyPath: "id", autoIncrement: true });
-        store.createIndex("ownerId", "ownerId", { unique: false });
-      }
-      if (!db.objectStoreNames.contains("spares")) {
-        db.createObjectStore("spares", { keyPath: "id", autoIncrement: true });
-      }
-      if (!db.objectStoreNames.contains("tools")) {
-        db.createObjectStore("tools", { keyPath: "id", autoIncrement: true });
-      }
-      if (!db.objectStoreNames.contains("locations")) {
-        db.createObjectStore("locations", { keyPath: "id", autoIncrement: true });
-      }
-      if (!db.objectStoreNames.contains("jobTemplates")) {
-        db.createObjectStore("jobTemplates", { keyPath: "id", autoIncrement: true });
-      }
-      if (!db.objectStoreNames.contains("customFields")) {
-        db.createObjectStore("customFields", { keyPath: "id", autoIncrement: true });
-      }
-    };
-
-    req.onsuccess = async (event) => {
-      db = event.target.result;
-      await ensureAdminUser();
-      resolve(db);
-    };
-
-    req.onerror = () => reject(req.error);
-  });
+/* Postgres uses snake_case columns; this app's JS uses camelCase everywhere.
+   These converters keep every existing render/entity-helper function
+   (getMyBikes, addBike, renderSpares, etc.) working completely unchanged. */
+function toSnakeCase(obj) {
+  const out = {};
+  for (const [k, v] of Object.entries(obj)) {
+    out[k.replace(/[A-Z]/g, m => "_" + m.toLowerCase())] = v;
+  }
+  return out;
 }
 
-function dbGetAll(storeName) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, "readonly");
-    const store = tx.objectStore(storeName);
-    const req = store.getAll();
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+function toCamelCase(row) {
+  if (!row) return row;
+  const out = {};
+  for (const [k, v] of Object.entries(row)) {
+    out[k.replace(/_([a-z0-9])/g, (_, c) => c.toUpperCase())] = v;
+  }
+  return out;
 }
 
-function dbGet(storeName, id) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, "readonly");
-    const store = tx.objectStore(storeName);
-    const req = store.get(id);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+async function dbGetAll(storeName) {
+  const { data, error } = await supabase
+    .from(TABLE_NAME[storeName])
+    .select("*")
+    .order("id", { ascending: true });
+  if (error) throw error;
+  return data.map(toCamelCase);
 }
 
-function dbAdd(storeName, obj) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
-    const req = store.add(obj);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+async function dbGet(storeName, id) {
+  const { data, error } = await supabase
+    .from(TABLE_NAME[storeName])
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) throw error;
+  return toCamelCase(data);
 }
 
-function dbPut(storeName, obj) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
-    const req = store.put(obj);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+async function dbAdd(storeName, obj) {
+  const { data, error } = await supabase
+    .from(TABLE_NAME[storeName])
+    .insert(toSnakeCase(obj))
+    .select()
+    .single();
+  if (error) throw error;
+  return data.id;
 }
 
-function dbDelete(storeName, id) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
-    const req = store.delete(id);
-    req.onsuccess = () => resolve();
-    req.onerror = () => reject(req.error);
-  });
+async function dbPut(storeName, obj) {
+  const { id, ...rest } = obj;
+  const { data, error } = await supabase
+    .from(TABLE_NAME[storeName])
+    .update(toSnakeCase(rest))
+    .eq("id", id)
+    .select()
+    .single();
+  if (error) throw error;
+  return toCamelCase(data);
+}
+
+async function dbDelete(storeName, id) {
+  const { error } = await supabase
+    .from(TABLE_NAME[storeName])
+    .delete()
+    .eq("id", id);
+  if (error) throw error;
 }
 
 async function ensureAdminUser() {
-  const users = await dbGetAll("users");
-  const admin = users.find(u => u.username === "admin");
-  if (!admin) {
-    await dbAdd("users", {
-      username: "admin",
-      password: "workshop",
-      role: "administrator",
-      createdAt: Date.now()
-    });
-  }
+  // Runs server-side (see ensure_admin_user() in the SQL setup script) so the
+  // client never needs read access to the users table just to bootstrap it.
+  const { error } = await supabase.rpc("ensure_admin_user");
+  if (error) console.error("ensureAdminUser:", error);
 }
 
 async function login(username, password) {
-  const users = await dbGetAll("users");
-  return users.find(u => u.username === username && u.password === password) || null;
+  // Runs server-side (see check_login() in the SQL setup script) so plain
+  // passwords are never sent back to the client or exposed via a public
+  // SELECT on the users table.
+  const { data, error } = await supabase.rpc("check_login", {
+    p_username: username,
+    p_password: password,
+  });
+  if (error) {
+    console.error("login:", error);
+    return null;
+  }
+  if (!data || data.length === 0) return null;
+  return toCamelCase(data[0]);
 }
+</script>
 
+<script>
 window.onload = () => {
 
   document.getElementById("login-btn").onclick = async () => {
@@ -418,18 +423,17 @@ window.onload = () => {
       return;
     }
 
-    const users = await dbGetAll("users");
-    if (users.some(u => u.username === username)) {
-      alert("Username already exists");
+    try {
+      await addUser({ username, password, role: "user" });
+    } catch (err) {
+      if (err && err.code === "23505") {
+        alert("Username already exists");
+      } else {
+        console.error(err);
+        alert("Could not create account.");
+      }
       return;
     }
-
-    await addUser({
-      username,
-      password,
-      role: "user",
-      createdAt: Date.now()
-    });
 
     alert("Account created. You can now log in.");
     document.getElementById("modal-create-account").style.display = "none";
@@ -437,7 +441,7 @@ window.onload = () => {
 
 };
 
-openDatabase().then(() => {
+ensureAdminUser().then(() => {
   const savedSession = localStorage.getItem("bikeWorkshopSession");
   if (savedSession) {
     currentUser = JSON.parse(savedSession);
@@ -454,27 +458,20 @@ openDatabase().then(() => {
 <script>
 /* USERS */
 async function addUser(user) {
-  return dbAdd("users", { ...user, createdAt: Date.now() });
+  return dbAdd("users", user);
 }
 
 /* BIKES (PER-USER) */
 async function addBike(bike) {
   return dbAdd("bikes", {
     ...bike,
-    ownerId: currentUser.id,
-    createdAt: Date.now()
+    ownerId: currentUser.id
   });
 }
 
 async function getMyBikes() {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction("bikes", "readonly");
-    const store = tx.objectStore("bikes");
-    const index = store.index("ownerId");
-    const req = index.getAll(currentUser.id);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+  const bikes = await dbGetAll("bikes");
+  return bikes.filter(b => b.ownerId === currentUser.id);
 }
 
 async function updateBike(id, patch) {
@@ -488,10 +485,7 @@ async function deleteBike(id) {
 
 /* SPARES (SHARED) */
 async function addSpare(spare) {
-  return dbAdd("spares", {
-    ...spare,
-    createdAt: Date.now()
-  });
+  return dbAdd("spares", spare);
 }
 
 async function getAllSpares() {
@@ -509,10 +503,7 @@ async function deleteSpare(id) {
 
 /* TOOLS (SHARED) */
 async function addTool(tool) {
-  return dbAdd("tools", {
-    ...tool,
-    createdAt: Date.now()
-  });
+  return dbAdd("tools", tool);
 }
 
 async function getAllTools() {
@@ -530,10 +521,7 @@ async function deleteTool(id) {
 
 /* LOCATIONS (SHARED) */
 async function addLocation(location) {
-  return dbAdd("locations", {
-    ...location,
-    createdAt: Date.now()
-  });
+  return dbAdd("locations", location);
 }
 
 async function getAllLocations() {
@@ -551,10 +539,7 @@ async function deleteLocation(id) {
 
 /* JOB TEMPLATES (SHARED, placeholder) */
 async function addJobTemplate(template) {
-  return dbAdd("jobTemplates", {
-    ...template,
-    createdAt: Date.now()
-  });
+  return dbAdd("jobTemplates", template);
 }
 
 async function getAllJobTemplates() {
@@ -563,15 +548,8 @@ async function getAllJobTemplates() {
 
 /* CUSTOM FIELDS */
 async function getCustomFieldsForCategory(category) {
-  const tx = db.transaction("customFields", "readonly");
-  const store = tx.objectStore("customFields");
-  return new Promise((resolve, reject) => {
-    const req = store.getAll();
-    req.onsuccess = () => {
-      resolve(req.result.filter(f => f.category === category));
-    };
-    req.onerror = () => reject(req.error);
-  });
+  const fields = await dbGetAll("customFields");
+  return fields.filter(f => f.category === category);
 }
 
 async function addCustomField(field) {
@@ -981,7 +959,7 @@ async function deleteCustomField(id) {
     </main>
 
     <footer class="footer">
-      Version 1.8 — September 2026 · © Adam Otis Farrugia
+      Version 1.5 — September 2026 · © Adam Otis Farrugia
     </footer>
   </div>
 </div>
@@ -1016,6 +994,38 @@ function showWorkshopUI() {
   renderTools();
   renderLocations();
   renderCustomFieldsAdmin();
+
+  subscribeToRealtimeUpdates();
+}
+
+let realtimeSubscribed = false;
+
+function subscribeToRealtimeUpdates() {
+  if (realtimeSubscribed) return; // avoid double-subscribing across logins
+  realtimeSubscribed = true;
+
+  supabase
+    .channel("workshop-data")
+    .on("postgres_changes", { event: "*", schema: "public", table: "bikes" }, () => {
+      renderBikes();
+      renderDashboard();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "spares" }, () => {
+      renderSpares();
+      renderDashboard();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "tools" }, () => {
+      renderTools();
+      renderDashboard();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "locations" }, () => {
+      renderLocations();
+      renderDashboard();
+    })
+    .on("postgres_changes", { event: "*", schema: "public", table: "custom_fields" }, () => {
+      renderCustomFieldsAdmin();
+    })
+    .subscribe();
 }
 
 document.getElementById("logout-btn").onclick = () => {
@@ -1665,13 +1675,7 @@ async function renderCustomFieldsAdmin() {
 
 <script>
 async function getById(storeName, id) {
-  const tx = db.transaction(storeName, "readonly");
-  const store = tx.objectStore(storeName);
-  return new Promise((resolve, reject) => {
-    const req = store.get(id);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
-  });
+  return dbGet(storeName, id);
 }
 
 /* SPARES → BIKES */
@@ -1763,28 +1767,25 @@ async function renderLinkingForSpare(div, spare) {
      ============================ -->
 
 <script>
-async function exportDatabase() {
-  const stores = [
-    "users",
-    "bikes",
-    "spares",
-    "tools",
-    "locations",
-    "jobTemplates",
-    "customFields"
-  ];
+/* Note: "users" is deliberately left out of export/import/clear — the
+   client can't SELECT that table directly (see the SQL setup script),
+   and account passwords shouldn't be sitting in a JSON export anyway.
+   This backs up and restores your workshop data (bikes, spares, tools,
+   locations, job templates, custom fields), not accounts. */
+const DATA_STORES = [
+  "bikes",
+  "spares",
+  "tools",
+  "locations",
+  "jobTemplates",
+  "customFields"
+];
 
+async function exportDatabase() {
   const exportObj = {};
 
-  for (const storeName of stores) {
-    const tx = db.transaction(storeName, "readonly");
-    const store = tx.objectStore(storeName);
-
-    exportObj[storeName] = await new Promise((resolve, reject) => {
-      const req = store.getAll();
-      req.onsuccess = () => resolve(req.result);
-      req.onerror = () => reject(req.error);
-    });
+  for (const storeName of DATA_STORES) {
+    exportObj[storeName] = await dbGetAll(storeName);
   }
 
   const json = JSON.stringify(exportObj, null, 2);
@@ -1808,36 +1809,16 @@ async function importDatabase(jsonData) {
     return;
   }
 
-  const stores = [
-    "users",
-    "bikes",
-    "spares",
-    "tools",
-    "locations",
-    "jobTemplates",
-    "customFields"
-  ];
-
-  for (const storeName of stores) {
-    const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
-    await new Promise((resolve, reject) => {
-      const req = store.clear();
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
+  for (const storeName of DATA_STORES) {
+    const existing = await dbGetAll(storeName);
+    for (const item of existing) {
+      await dbDelete(storeName, item.id);
+    }
   }
 
-  for (const storeName of stores) {
-    const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
-
+  for (const storeName of DATA_STORES) {
     for (const item of data[storeName] || []) {
-      await new Promise((resolve, reject) => {
-        const req = store.add(item);
-        req.onsuccess = () => resolve();
-        req.onerror = () => reject(req.error);
-      });
+      await dbAdd(storeName, item);
     }
   }
 
@@ -1857,24 +1838,11 @@ async function clearDatabase() {
     return;
   }
 
-  const stores = [
-    "users",
-    "bikes",
-    "spares",
-    "tools",
-    "locations",
-    "jobTemplates",
-    "customFields"
-  ];
-
-  for (const storeName of stores) {
-    const tx = db.transaction(storeName, "readwrite");
-    const store = tx.objectStore(storeName);
-    await new Promise((resolve, reject) => {
-      const req = store.clear();
-      req.onsuccess = () => resolve();
-      req.onerror = () => reject(req.error);
-    });
+  for (const storeName of DATA_STORES) {
+    const existing = await dbGetAll(storeName);
+    for (const item of existing) {
+      await dbDelete(storeName, item.id);
+    }
   }
 
   alert("Database cleared. Reloading…");
