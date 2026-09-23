@@ -275,8 +275,8 @@
    SUPABASE CONNECTION — fill these in from your
    Supabase project's Settings > API page
    ============================================ */
-const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";       // e.g. https://abcxyz.supabase.co
-const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_PUBLIC_KEY";
+const SUPABASE_URL = "https://swsjvfyoefecntawmxei.supabase.co";       // e.g. https://abcxyz.supabase.co
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3c2p2ZnlvZWZlY250YXdteGVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTY1OTUsImV4cCI6MjEwNTYzMjU5NX0.ptWYqr2Ecf-ZxMW2vngPM-MHS64B1ai__OzQiYR5zik";
 
 let sb = null;
 
@@ -487,16 +487,16 @@ window.onload = () => {
     document.getElementById("modal-create-account").style.display = "none";
   };
 
-};
+  ensureAdminUser().then(() => {
+    const savedSession = localStorage.getItem("bikeWorkshopSession");
+    if (savedSession) {
+      currentUser = JSON.parse(savedSession);
+      document.getElementById("login-screen").style.display = "none";
+      showWorkshopUI();
+    }
+  });
 
-ensureAdminUser().then(() => {
-  const savedSession = localStorage.getItem("bikeWorkshopSession");
-  if (savedSession) {
-    currentUser = JSON.parse(savedSession);
-    document.getElementById("login-screen").style.display = "none";
-    showWorkshopUI();
-  }
-});
+};
 </script>
 
 <!-- ============================
@@ -1007,7 +1007,7 @@ async function deleteCustomField(id) {
     </main>
 
     <footer class="footer">
-      Version 2.2 — September 2026 · © Adam Otis Farrugia
+      Version 2.3 — September 2026 · © Adam Otis Farrugia
     </footer>
   </div>
 </div>
