@@ -278,7 +278,43 @@
 const SUPABASE_URL = https://swsjvfyoefecntawmxei.supabase.co/rest/v1/;       // e.g. https://abcxyz.supabase.co
 const SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3c2p2ZnlvZWZlY250YXdteGVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTY1OTUsImV4cCI6MjEwNTYzMjU5NX0.ptWYqr2Ecf-ZxMW2vngPM-MHS64B1ai__OzQiYR5zik;
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase = null;
+
+function showSupabaseConfigError(message) {
+  console.error("[Supabase setup]", message);
+  const banner = document.createElement("div");
+  banner.style.cssText =
+    "background:#7f1d1d;color:#fff;padding:12px 14px;border-radius:10px;" +
+    "margin-bottom:14px;font-size:0.8rem;line-height:1.4;text-align:left;";
+  banner.textContent = message;
+  const card = document.querySelector(".login-card");
+  if (card) card.insertBefore(banner, card.firstChild);
+}
+
+if (
+  !SUPABASE_URL || SUPABASE_URL.indexOf("YOUR_SUPABASE") !== -1 ||
+  !SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.indexOf("YOUR_SUPABASE") !== -1
+) {
+  showSupabaseConfigError(
+    "Setup incomplete: SUPABASE_URL / SUPABASE_ANON_KEY near the top of this file still have placeholder text. " +
+    "Replace them with the values from your Supabase project's Settings > API page."
+  );
+} else {
+  try {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  } catch (err) {
+    showSupabaseConfigError(
+      "Could not create the Supabase client: " + err.message +
+      ". Check that SUPABASE_URL is a full address like https://xxxx.supabase.co with no extra quotes or spaces."
+    );
+  }
+}
+
+function requireSupabase() {
+  if (!supabase) {
+    throw new Error("Supabase is not configured — see the red message on the login screen.");
+  }
+}
 
 let currentUser = null;
 
@@ -314,6 +350,7 @@ function toCamelCase(row) {
 }
 
 async function dbGetAll(storeName) {
+  requireSupabase();
   const { data, error } = await supabase
     .from(TABLE_NAME[storeName])
     .select("*")
@@ -323,6 +360,7 @@ async function dbGetAll(storeName) {
 }
 
 async function dbGet(storeName, id) {
+  requireSupabase();
   const { data, error } = await supabase
     .from(TABLE_NAME[storeName])
     .select("*")
@@ -333,6 +371,7 @@ async function dbGet(storeName, id) {
 }
 
 async function dbAdd(storeName, obj) {
+  requireSupabase();
   const { data, error } = await supabase
     .from(TABLE_NAME[storeName])
     .insert(toSnakeCase(obj))
@@ -343,6 +382,7 @@ async function dbAdd(storeName, obj) {
 }
 
 async function dbPut(storeName, obj) {
+  requireSupabase();
   const { id, ...rest } = obj;
   const { data, error } = await supabase
     .from(TABLE_NAME[storeName])
@@ -355,6 +395,7 @@ async function dbPut(storeName, obj) {
 }
 
 async function dbDelete(storeName, id) {
+  requireSupabase();
   const { error } = await supabase
     .from(TABLE_NAME[storeName])
     .delete()
@@ -365,6 +406,7 @@ async function dbDelete(storeName, id) {
 async function ensureAdminUser() {
   // Runs server-side (see ensure_admin_user() in the SQL setup script) so the
   // client never needs read access to the users table just to bootstrap it.
+  if (!supabase) return; // config error already shown on screen
   const { error } = await supabase.rpc("ensure_admin_user");
   if (error) console.error("ensureAdminUser:", error);
 }
@@ -373,13 +415,14 @@ async function login(username, password) {
   // Runs server-side (see check_login() in the SQL setup script) so plain
   // passwords are never sent back to the client or exposed via a public
   // SELECT on the users table.
+  requireSupabase();
   const { data, error } = await supabase.rpc("check_login", {
     p_username: username,
     p_password: password,
   });
   if (error) {
     console.error("login:", error);
-    return null;
+    throw error;
   }
   if (!data || data.length === 0) return null;
   return toCamelCase(data[0]);
@@ -398,16 +441,21 @@ window.onload = () => {
       return;
     }
 
-    const user = await login(username, password);
-    if (!user) {
-      alert("Invalid credentials");
-      return;
-    }
+    try {
+      const user = await login(username, password);
+      if (!user) {
+        alert("Invalid credentials");
+        return;
+      }
 
-    currentUser = user;
-    localStorage.setItem("bikeWorkshopSession", JSON.stringify(user));
-    document.getElementById("login-screen").style.display = "none";
-    showWorkshopUI();
+      currentUser = user;
+      localStorage.setItem("bikeWorkshopSession", JSON.stringify(user));
+      document.getElementById("login-screen").style.display = "none";
+      showWorkshopUI();
+    } catch (err) {
+      console.error(err);
+      alert("Login failed: " + (err.message || err));
+    }
   };
 
   document.getElementById("create-account-btn").onclick = () => {
@@ -430,7 +478,7 @@ window.onload = () => {
         alert("Username already exists");
       } else {
         console.error(err);
-        alert("Could not create account.");
+        alert("Could not create account: " + (err.message || err));
       }
       return;
     }
@@ -959,7 +1007,7 @@ async function deleteCustomField(id) {
     </main>
 
     <footer class="footer">
-      Version 1.9 — September 2026 · © Adam Otis Farrugia
+      Version 2.0 — September 2026 · © Adam Otis Farrugia
     </footer>
   </div>
 </div>
