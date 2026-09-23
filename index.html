@@ -275,10 +275,10 @@
    SUPABASE CONNECTION — fill these in from your
    Supabase project's Settings > API page
    ============================================ */
-const SUPABASE_URL = "https://swsjvfyoefecntawmxei.supabase.co";       // e.g. https://abcxyz.supabase.co
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN3c2p2ZnlvZWZlY250YXdteGVpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwNTY1OTUsImV4cCI6MjEwNTYzMjU5NX0.ptWYqr2Ecf-ZxMW2vngPM-MHS64B1ai__OzQiYR5zik";
+const SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL";       // e.g. https://abcxyz.supabase.co
+const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_PUBLIC_KEY";
 
-let supabase = null;
+let sb = null;
 
 function showSupabaseConfigError(message) {
   console.error("[Supabase setup]", message);
@@ -301,7 +301,7 @@ if (
   );
 } else {
   try {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   } catch (err) {
     showSupabaseConfigError(
       "Could not create the Supabase client: " + err.message +
@@ -311,7 +311,7 @@ if (
 }
 
 function requireSupabase() {
-  if (!supabase) {
+  if (!sb) {
     throw new Error("Supabase is not configured — see the red message on the login screen.");
   }
 }
@@ -351,7 +351,7 @@ function toCamelCase(row) {
 
 async function dbGetAll(storeName) {
   requireSupabase();
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from(TABLE_NAME[storeName])
     .select("*")
     .order("id", { ascending: true });
@@ -361,7 +361,7 @@ async function dbGetAll(storeName) {
 
 async function dbGet(storeName, id) {
   requireSupabase();
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from(TABLE_NAME[storeName])
     .select("*")
     .eq("id", id)
@@ -372,7 +372,7 @@ async function dbGet(storeName, id) {
 
 async function dbAdd(storeName, obj) {
   requireSupabase();
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from(TABLE_NAME[storeName])
     .insert(toSnakeCase(obj))
     .select()
@@ -384,7 +384,7 @@ async function dbAdd(storeName, obj) {
 async function dbPut(storeName, obj) {
   requireSupabase();
   const { id, ...rest } = obj;
-  const { data, error } = await supabase
+  const { data, error } = await sb
     .from(TABLE_NAME[storeName])
     .update(toSnakeCase(rest))
     .eq("id", id)
@@ -396,7 +396,7 @@ async function dbPut(storeName, obj) {
 
 async function dbDelete(storeName, id) {
   requireSupabase();
-  const { error } = await supabase
+  const { error } = await sb
     .from(TABLE_NAME[storeName])
     .delete()
     .eq("id", id);
@@ -406,8 +406,8 @@ async function dbDelete(storeName, id) {
 async function ensureAdminUser() {
   // Runs server-side (see ensure_admin_user() in the SQL setup script) so the
   // client never needs read access to the users table just to bootstrap it.
-  if (!supabase) return; // config error already shown on screen
-  const { error } = await supabase.rpc("ensure_admin_user");
+  if (!sb) return; // config error already shown on screen
+  const { error } = await sb.rpc("ensure_admin_user");
   if (error) console.error("ensureAdminUser:", error);
 }
 
@@ -416,7 +416,7 @@ async function login(username, password) {
   // passwords are never sent back to the client or exposed via a public
   // SELECT on the users table.
   requireSupabase();
-  const { data, error } = await supabase.rpc("check_login", {
+  const { data, error } = await sb.rpc("check_login", {
     p_username: username,
     p_password: password,
   });
@@ -1007,7 +1007,7 @@ async function deleteCustomField(id) {
     </main>
 
     <footer class="footer">
-      Version 2.1 — September 2026 · © Adam Otis Farrugia
+      Version 2.2 — September 2026 · © Adam Otis Farrugia
     </footer>
   </div>
 </div>
@@ -1052,7 +1052,7 @@ function subscribeToRealtimeUpdates() {
   if (realtimeSubscribed) return; // avoid double-subscribing across logins
   realtimeSubscribed = true;
 
-  supabase
+  sb
     .channel("workshop-data")
     .on("postgres_changes", { event: "*", schema: "public", table: "bikes" }, () => {
       renderBikes();
